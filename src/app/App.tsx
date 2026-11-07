@@ -1,4 +1,4 @@
-import { HeartHandshake, MonitorPlay, PanelRight, RotateCcw, Route } from 'lucide-react';
+import { HeartHandshake, MonitorPlay, Moon, PanelRight, RotateCcw, Route, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GuidedDemo } from '../components/GuidedDemo';
 import { DriverApp } from '../driver/DriverApp';
@@ -59,6 +59,12 @@ export function App() {
     document.documentElement.style.setProperty('--phone-scale', String(scale));
   }, [scale]);
 
+  // One shared theme for all three views; it lives in synced UI state so other tabs follow.
+  useEffect(() => {
+    document.documentElement.dataset.theme = stage.theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', stage.theme === 'light' ? '#f4f5f7' : '#0b0c0e');
+  }, [stage.theme]);
+
   const showPassenger = view === 'passenger' || (view === 'all' && (layout !== 'single' || stage.mobileView === 'passenger'));
   const showDriver = view === 'driver' || (view === 'all' && (layout !== 'single' || stage.mobileView === 'driver'));
   const operatorInline = view === 'operator' || (view === 'all' && (layout === 'wide' || (layout === 'single' && stage.mobileView === 'operator')));
@@ -74,9 +80,17 @@ export function App() {
         </div>
         <div className={`stage-scenario ${disaster.status === 'active' ? 'is-active' : ''}`}>
           <Route size={15} />
-          {disaster.status === 'active' ? `SIMULATED: ${disaster.name}` : disaster.status === 'resolved' ? 'Scenario resolved' : 'Normal operations'}
+          {disaster.status === 'active' ? `SIMULATED: ${disaster.name}` : disaster.status === 'resolved' ? 'Scenario resolved' : 'Lifeline inactive'}
         </div>
         <div className="stage-actions">
+          <div className="theme-toggle" role="radiogroup" aria-label="Theme">
+            {(['light', 'dark'] as const).map((t) => (
+              <button key={t} role="radio" aria-checked={stage.theme === t} className={stage.theme === t ? 'is-on' : ''} onClick={() => setUi('stage', { theme: t })}>
+                {t === 'light' ? <Sun size={15} /> : <Moon size={15} />}
+                <span>{t === 'light' ? 'Light' : 'Dark'}</span>
+              </button>
+            ))}
+          </div>
           {view === 'all' && (
             <button className={stage.guideOpen ? 'is-on' : ''} onClick={() => setUi('stage', { guideOpen: !stage.guideOpen })}>Guided Demo</button>
           )}
@@ -84,7 +98,7 @@ export function App() {
             <MonitorPlay size={16} /> <span>Present</span>
           </button>
           {layout === 'drawer' && (
-            <button className={drawer ? 'is-on' : ''} onClick={() => setDrawer(!drawer)}><PanelRight size={16} /> <span>Operator</span></button>
+            <button className={drawer ? 'is-on' : ''} onClick={() => setDrawer(!drawer)}><PanelRight size={16} /> <span>Admin</span></button>
           )}
           <button onClick={reset}><RotateCcw size={16} /> <span>Reset Demo</span></button>
         </div>
@@ -96,7 +110,7 @@ export function App() {
         <div className="view-switch" role="tablist">
           {(['passenger', 'driver', 'operator'] as const).map((v) => (
             <button key={v} role="tab" aria-selected={stage.mobileView === v} className={stage.mobileView === v ? 'is-on' : ''} onClick={() => setUi('stage', { mobileView: v })}>
-              {v[0].toUpperCase() + v.slice(1)}
+              {v === 'operator' ? 'Admin' : v[0].toUpperCase() + v.slice(1)}
             </button>
           ))}
         </div>
@@ -119,7 +133,7 @@ export function App() {
       </div>
 
       <footer className="stage-foot">
-        DEMO ONLY: fictional people, places, routes and amounts. Not an official inDrive service. No real disaster alert, emergency dispatch or payment.
+        DEMO ONLY: fictional people, places, routes and amounts. Not an official inDrive service, not a rescue or ambulance service. No real disaster alert, emergency dispatch or payment.
       </footer>
     </div>
   );

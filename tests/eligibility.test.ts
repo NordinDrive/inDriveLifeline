@@ -2,61 +2,78 @@ import { describe, expect, it } from 'vitest';
 import { createInitialState } from '../src/data/initialState';
 import { PHONE_DRIVER_ID } from '../src/data/mockDrivers';
 import * as wf from '../src/domain/workflow';
-import { evacuationInput, must, NOW, offeredEvacuation, quakeA, verifiedOnlineDriver } from './helpers';
+import { must, NOW, publishedMission, quakeA } from './helpers';
 
-describe('driver eligibility', () => {
-  it('an unenrolled driver cannot accept the seeded mission', () => {
-    let s = createInitialState();
-    s = must(wf.setDriverOnline(s, PHONE_DRIVER_ID, true, NOW));
-    const out = wf.acceptMission(s, 'MSN-0001', PHONE_DRIVER_ID, NOW);
+const FORM = { safetyTraining: true, conductAccepted: true, vehicleChecked: true, seats: 3, accessible: false };
+
+/** Publishes a mission while the phone driver is in a given (non-ready) state. */
+function missionWithDriver(prepare: (s: ReturnType<typeof createInitialState>) => ReturnType<typeof createInitialState>) {
+  let s = quakeA(prepare(createInitialState()));
+  const sub = wf.submitRequest(s, { source: 'passenger', pickupId: 'P-ALPHA', destinationId: 'S-GREEN', passengers: 2, accessibility: 'none' }, NOW);
+  s = must(sub);
+  const pub = wf.approveRequest(s, sub.id!, NOW);
+  return { state: must(pub), missionId: pub.id! };
+}
+
+describe('volunteer eligibility', () => {
+  it('a driver who has not joined Lifeline cannot accept', () => {
+    const { state, missionId } = missionWithDriver((s) => must(wf.setDriverOnline(s, PHONE_DRIVER_ID, true, NOW)));
+    const out = wf.acceptMission(state, missionId, PHONE_DRIVER_ID, NOW);
     expect(out.ok).toBe(false);
-    expect(out.reasons.join()).toMatch(/verification required/i);
+    expect(out.reasons.join()).toMatch(/Join Lifeline/);
   });
 
-  it('a pending driver cannot accept until the operator approves', () => {
-    let s = createInitialState();
-    s = must(wf.applyForLifeline(s, PHONE_DRIVER_ID, { safetyTraining: true, conductAccepted: true, vehicleChecked: true, seats: 3, accessible: false }, NOW));
-    s = must(wf.setDriverOnline(s, PHONE_DRIVER_ID, true, NOW));
-    expect(wf.acceptMission(s, 'MSN-0001', PHONE_DRIVER_ID, NOW).ok).toBe(false);
-    s = must(wf.approveDriver(s, PHONE_DRIVER_ID, NOW));
-    expect(wf.acceptMission(s, 'MSN-0001', PHONE_DRIVER_ID, NOW).ok).toBe(true);
+  it('a pending volunteer cannot accept or become available until the Admin verifies them', () => {
+    const { state, missionId } = missionWithDriver((s) => must(wf.setDriverOnline(must(wf.applyForLifeline(s, PHONE_DRIVER_ID, FORM, NOW)), PHONE_DRIVER_ID, true, NOW)));
+    expect(wf.setLifelineAvailability(state, PHONE_DRIVER_ID, true, NOW).ok).toBe(false);
+    expect(wf.acceptMission(state, missionId, PHONE_DRIVER_ID, NOW).ok).toBe(false);
+    let s = must(wf.approveDriver(state, PHONE_DRIVER_ID, NOW));
+    s = must(wf.setLifelineAvailability(s, PHONE_DRIVER_ID, true, NOW));
+    expect(wf.acceptMission(s, missionId, PHONE_DRIVER_ID, NOW).ok).toBe(true);
+  });
+
+  it('a verified volunteer must also choose to be available', () => {
+    const { state, missionId } = missionWithDriver((s) =>
+      must(wf.setDriverOnline(must(wf.approveDriver(must(wf.applyForLifeline(s, PHONE_DRIVER_ID, FORM, NOW)), PHONE_DRIVER_ID, NOW)), PHONE_DRIVER_ID, true, NOW)),
+    );
+    const out = wf.acceptMission(state, missionId, PHONE_DRIVER_ID, NOW);
+    expect(out.ok).toBe(false);
+    expect(out.reasons.join()).toMatch(/Not available/);
+  });
+
+  it('going offline ends Lifeline availability', () => {
+    let { state } = publishedMission();
+    state = must(wf.setDriverOnline(state, PHONE_DRIVER_ID, false, NOW));
+    expect(state.drivers[PHONE_DRIVER_ID].available).toBe(false);
   });
 
   it('enrollment requires training, conduct and vehicle check', () => {
-    const out = wf.applyForLifeline(createInitialState(), PHONE_DRIVER_ID, { safetyTraining: false, conductAccepted: true, vehicleChecked: true, seats: 3, accessible: false }, NOW);
+    const out = wf.applyForLifeline(createInitialState(), PHONE_DRIVER_ID, { ...FORM, safetyTraining: false }, NOW);
     expect(out.ok).toBe(false);
   });
 
   it('suspended drivers cannot accept', () => {
-    let { state, missionId } = offeredEvacuation();
+    let { state, missionId } = publishedMission();
     state = must(wf.suspendDriver(state, PHONE_DRIVER_ID, NOW));
     expect(wf.acceptMission(state, missionId, PHONE_DRIVER_ID, NOW).ok).toBe(false);
   });
 
-  it('passenger count is validated against capacity', () => {
-    let s = quakeA(verifiedOnlineDriver());
-    const sub = wf.submitRequest(s, evacuationInput({ passengers: 4 }), NOW);
-    s = must(sub);
-    s = must(wf.verifyNeed(s, sub.id!, NOW));
-    s = must(wf.approveRoute(s, sub.id!, NOW));
-    const offer = wf.offerMission(s, sub.id!, NOW);
-    expect(offer.ok).toBe(false); // Alex has 3 seats, Yasmin is offline
+  it('drivers need enough seats', () => {
+    const { state, missionId } = publishedMission({ passengers: 4 });
+    const out = wf.acceptMission(state, missionId, PHONE_DRIVER_ID, NOW);
+    expect(out.ok).toBe(false); // Alex declares 3 passenger seats
+    expect(out.reasons.join()).toMatch(/seats/);
   });
 
   it('wheelchair requests need an accessible vehicle', () => {
-    let s = verifiedOnlineDriver();
-    s = must(wf.verifyNeed(s, 'REQ-0002', NOW));
-    s = must(wf.approveRoute(s, 'REQ-0002', NOW));
-    expect(wf.offerMission(s, 'REQ-0002', NOW).ok).toBe(false);
-    s = must(wf.setDriverOnline(s, 'DRV-002', true, NOW));
-    const offer = wf.offerMission(s, 'REQ-0002', NOW);
-    s = must(offer);
-    expect(wf.acceptMission(s, offer.id!, PHONE_DRIVER_ID, NOW).ok).toBe(false);
-    expect(wf.acceptMission(s, offer.id!, 'DRV-002', NOW).ok).toBe(true);
+    let { state, missionId } = publishedMission({ accessibility: 'wheelchair', passengers: 1 });
+    expect(wf.acceptMission(state, missionId, PHONE_DRIVER_ID, NOW).ok).toBe(false);
+    state = must(wf.setLifelineAvailability(state, 'DRV-002', true, NOW));
+    expect(wf.acceptMission(state, missionId, 'DRV-002', NOW).ok).toBe(true);
   });
 
   it('passenger form rejects more than 4 passengers', () => {
     const s = quakeA(createInitialState());
-    expect(wf.validateRequest(s, evacuationInput({ passengers: 5 })).passengers).toBeDefined();
+    expect(wf.validateRequest(s, { source: 'passenger', pickupId: 'P-ALPHA', destinationId: 'S-GREEN', passengers: 5, accessibility: 'none' }).passengers).toBeDefined();
   });
 });

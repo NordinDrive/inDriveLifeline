@@ -4,12 +4,14 @@ import { CityRidesArt, CityToCityArt, CourierArt, FreightArt, RouteCardArt } fro
 import { FictionalMap } from '../components/FictionalMap';
 import { AlertStrip } from '../components/PhoneOverlays';
 import { DemoTag } from '../components/ui';
+import { PASSENGER } from '../data/mockPassenger';
+import { lifelineOpenIn } from '../domain/dispatch';
 
 export function PassengerHome() {
   const setUi = useDemo((s) => s.setUi);
-  const disaster = useDemo((s) => s.domain.disaster);
   const toast = useDemo((s) => s.toast);
-  const active = disaster.status === 'active';
+  // Lifeline only surfaces on the home screen while it is active in this passenger's area.
+  const active = useDemo((s) => lifelineOpenIn(s.domain, PASSENGER.districtId));
   const info = (title: string) => setUi('passenger', { info: title });
 
   return (
@@ -43,11 +45,11 @@ export function PassengerHome() {
       <div className="sheet">
         <div className="sheet-grabber" />
         {active && (
-          <button className="evac-cta" onClick={() => setUi('passenger', { screen: 'request', requestPreset: 'evacuation_transfer' })}>
+          <button className="evac-cta" onClick={() => setUi('passenger', { screen: 'request' })}>
             <HeartHandshake size={26} />
             <span>
-              <strong>Request safe transport</strong>
-              <small>Lifeline · approved pickup points to approved shelters</small>
+              <strong>Request transport to a shelter</strong>
+              <small>Lifeline · designated pickup points to approved shelters</small>
             </span>
             <ChevronRight size={20} />
           </button>

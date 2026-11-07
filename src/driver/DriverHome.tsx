@@ -81,11 +81,11 @@ export function DriverHome() {
             <h3>Performance</h3>
             <div className="perf-grid">
               <div><span>Rating</span><strong>{driver.rating.split(' ')[0]}</strong></div>
-              <div><span>Lifeline earned</span><strong>{totals.approvedBase + totals.approvedBonus} MAD</strong></div>
-              <div><span>Bonuses approved</span><strong>{totals.approvedBonus} MAD</strong></div>
-              <div><span>Pending</span><strong>{totals.pendingBase + totals.pendingBonus} MAD</strong></div>
+              <div><span>Lifeline bonus approved</span><strong>{totals.approvedBonus} MAD</strong></div>
+              <div><span>Lifeline bonus pending</span><strong>{totals.pendingBonus} MAD</strong></div>
+              <div><span>Lifeline trip fares</span><strong>{totals.approvedBase} MAD</strong></div>
             </div>
-            <button className="btn-dark" onClick={() => setUi('driver', { screen: 'earnings' })}>Open Mission Earnings</button>
+            <button className="btn-dark" onClick={() => setUi('driver', { screen: 'earnings' })}>Open earnings history</button>
             <p className="d-fine">Demo amounts only. No real payouts.</p>
           </div>
         )}

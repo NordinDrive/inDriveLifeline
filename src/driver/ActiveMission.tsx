@@ -4,9 +4,9 @@ import { PHONE_DRIVER_ID } from '../data/mockDrivers';
 import { pointById } from '../data/mockLocations';
 import { FictionalMap } from '../components/FictionalMap';
 import { Badge, DemoTag, ScreenHeader } from '../components/ui';
-import { isTransport } from '../domain/eligibility';
+import { EarningsLines } from '../components/MissionCard';
 import { BONUS_LABEL } from '../domain/labels';
-import { advanceMission, MISSION_FLOW, reportSafetyIssue, SERVICE_LABEL } from '../domain/workflow';
+import { advanceMission, MISSION_ACTION, MISSION_FLOW, reportSafetyIssue, SERVICE_LABEL } from '../domain/workflow';
 
 export function ActiveMission() {
   const setUi = useDemo((s) => s.setUi);
@@ -24,26 +24,18 @@ export function ActiveMission() {
     );
   }
 
-  const transport = isTransport(mission.service);
-  const labels = ['Accepted', 'On My Way', 'Arrived at Pickup', transport ? 'Passengers Picked Up' : 'Cargo Picked Up', transport ? 'Arrived at Shelter' : 'Arrived at Drop-off', 'Completion Submitted'];
-  const actions: Record<string, string> = {
-    accepted: 'On my way',
-    en_route: 'Arrived at pickup',
-    at_pickup: transport ? 'Passenger(s) picked up' : 'Cargo picked up',
-    onboard: transport ? 'Arrived at shelter' : 'Arrived at drop-off',
-    arrived: 'Submit completion',
-  };
+  const labels = ['Accepted', 'On my way', 'Arrived at pickup', 'Passengers picked up', 'Arrived at shelter', 'Completion submitted'];
   const idx = MISSION_FLOW.indexOf(mission.status);
   const bonus = domain.bonuses[mission.id];
   const terminal = ['confirmed', 'cancelled', 'blocked'].includes(mission.status);
 
   return (
     <div className="screen scroll ll">
-      <ScreenHeader title={SERVICE_LABEL[mission.service]} subtitle={`${mission.id} · Verified humanitarian mission`} onBack={() => setUi('driver', { screen: 'lifeline' })} />
+      <ScreenHeader title={SERVICE_LABEL} subtitle={`${mission.id} · ${mission.passengers} passenger${mission.passengers > 1 ? 's' : ''}`} onBack={() => setUi('driver', { screen: 'lifeline' })} />
       <div className="trk-map"><FictionalMap variant="card" highlightRouteId={mission.routeId} focusPointIds={[mission.pickupId, mission.destinationId]} /></div>
       {mission.safetyHold && (
         <div className="inline-warn inline-warn--danger">
-          <strong>Paused for safety.</strong> {mission.safetyHold.reason}. Stay at a safe location and wait for the coordinator. No penalty applies.
+          <strong>Paused for safety.</strong> {mission.safetyHold.reason}. Stay at a safe location and wait for the Lifeline Admin. No penalty applies.
         </div>
       )}
       <div className="trk-route">
@@ -59,29 +51,30 @@ export function ActiveMission() {
         ))}
         <li className={mission.status === 'confirmed' ? 'done' : mission.status === 'awaiting_confirmation' ? 'current' : ''}>
           <span className="trk-dot">{mission.status === 'confirmed' ? <CheckCircle2 size={16} /> : null}</span>
-          <span>Coordinator confirmation</span>
+          <span>Admin confirmation</span>
         </li>
       </ol>
       {bonus && (
-        <div className="earn">
-          <div><span>Base mission compensation</span><strong>{bonus.base} MAD</strong></div>
-          <div className="earn-bonus"><span>Lifeline bonus</span><strong>+{bonus.bonus} MAD <Badge tone={bonus.status === 'approved' ? 'success' : bonus.status === 'held' ? 'warn' : 'muted'}>{BONUS_LABEL[bonus.status]}</Badge></strong></div>
-        </div>
+        <EarningsLines
+          base={bonus.base}
+          bonus={bonus.bonus}
+          status={<Badge tone={bonus.status === 'approved' ? 'success' : bonus.status === 'held' ? 'warn' : bonus.status === 'not_eligible' ? 'danger' : 'muted'}>{BONUS_LABEL[bonus.status]}</Badge>}
+        />
       )}
       {mission.status === 'awaiting_confirmation' && (
-        <p className="trk-note"><Clock size={16} /> Completion submitted. Waiting for the coordinator to confirm safe arrival before the bonus is approved.</p>
+        <p className="trk-note"><Clock size={16} /> Completion submitted. Your bonus stays pending until the Lifeline Admin confirms completion.</p>
       )}
-      {mission.status === 'confirmed' && <p className="trk-note"><CheckCircle2 size={16} /> Mission confirmed. Thank you for helping your community.</p>}
-      {mission.status === 'cancelled' && <p className="trk-note">This mission was cancelled. No penalty applies.</p>}
+      {mission.status === 'confirmed' && <p className="trk-note"><CheckCircle2 size={16} /> Mission confirmed and bonus approved. Thank you for volunteering.</p>}
+      {mission.status === 'cancelled' && <p className="trk-note">This mission was cancelled. No penalty applies, and cancelled missions do not earn a bonus.</p>}
       <div className="form-actions">
-        {actions[mission.status] && (
+        {MISSION_ACTION[mission.status] && (
           <button className="btn-lime" disabled={Boolean(mission.safetyHold)} onClick={() => perform((s, now) => advanceMission(s, mission.id, PHONE_DRIVER_ID, now))}>
-            {actions[mission.status]}
+            {MISSION_ACTION[mission.status]}
           </button>
         )}
         {!terminal && mission.status !== 'awaiting_confirmation' && !mission.safetyHold && (
           <button className="btn-danger-ghost" onClick={() => perform((s, now) => reportSafetyIssue(s, mission.id, PHONE_DRIVER_ID, now))}>
-            <AlertOctagon size={18} /> Report safety issue &amp; pause
+            <AlertOctagon size={18} /> Report safety concern &amp; pause
           </button>
         )}
       </div>

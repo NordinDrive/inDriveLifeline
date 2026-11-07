@@ -1,37 +1,122 @@
-/* Design tokens measured from the reference screenshots (920×2000 px captures,
-   scaled to a 390 pt wide phone screen). */
+/* Design tokens. Dark values are measured from the reference screenshots
+   (920×2000 px captures, scaled to a 390 pt wide phone screen). Light values are
+   an inferred inDrive-style white theme: white surfaces, light-gray cards, dark
+   text, clear borders and the same lime accent. Every colour in app.css and the
+   SVG map reads from here, so both themes stay consistent. */
 :root {
   --lime: #c1f11d;
   --lime-press: #aed61a;
   --lime-ink: #111;
+  --lime-text: #c1f11d;          /* lime used as text/icon on a neutral surface */
+  --lime-border: #c1f11d;        /* selection rings */
+  --lime-soft-bg: #24310d;
+  --lime-soft-border: #4f6a12;
+  --lime-disabled-bg: #3b4220;
+  --lime-disabled-fg: #7f8a5a;
+  --chip-on-bg: #2c3315;
 
   --app-bg: #141414;          /* gaps between passenger home sheets */
   --sheet: #212121;           /* passenger home panels */
   --tile: #2b2b2b;            /* service tiles / search field */
+  --tile-big: #262626;
   --driver-bg: #1c1c1c;       /* driver home background */
   --menu-bg: #242424;         /* side menu panel */
   --menu-active: #2e2e2e;     /* active row (City) */
+  --menu-hover: #2a2a2a;
   --menu-divider: #3a3a3a;
   --card: #262626;
-  --card-2: #2f2f2f;
-  --line: #353535;
+  --card-border: #333;
+  --inset: #1f1f1f;           /* earnings box inside cards */
+  --inset-border: transparent;
+  --modal: #1f1f1f;           /* bottom sheets */
+  --line: #333;
+  --line-strong: #555;
+  --track-done: #607a1a;
+  --mcard-border: #343a22;
 
   --text: #ffffff;
   --text-2: #a7a7a7;
   --text-3: #7c7c7c;
   --icon: #9a9a9a;
 
+  --btn-round: #222;
+  --btn-round-border: #383838;
+  --btn-map: #262626;
+  --btn-dark: #333;
+  --btn-dark-text: #fff;
+  --seg-bg: #262626;
+  --seg-on: #3a3a3a;
+  --tabbar-bg: #1e1e1e;
+  --tabbar-border: #3a3a3a;
+  --tabbar-on: #3a3a3a;
+  --tabbar-text: #e9e9e9;
+  --pill-bg: rgba(28, 28, 28, .96);
+
+  --ok-text: #9fe07b;
+  --bad-text: #ff8e91;
+  --warn-text: #ffc766;
+  --info-text: #7cb7ff;
+  --badge-info-bg: #233142; --badge-info-fg: #a9cdf7;
+  --badge-success-bg: #1f3317; --badge-success-fg: #9fe07b;
+  --badge-warn-bg: #3a2c12; --badge-warn-fg: #ffc766;
+  --badge-danger-bg: #3a1719; --badge-danger-fg: #ff8e91;
+  --badge-muted-bg: #333; --badge-muted-fg: #c4c4c4;
+  --danger-soft-bg: #3a1719; --danger-soft-fg: #ffc4c5;
+  --warn-soft-bg: #2d2015; --warn-soft-fg: #ffd9a8;
+  --disclaimer-bg: #2a2016; --disclaimer-fg: #f3d7b5;
+  --danger-ghost-border: #5a2a2a; --danger-ghost-fg: #ff8d8d;
+
+  --sev-advisory-bg: #352a10; --sev-advisory-border: #6e5414; --sev-advisory-fg: #ffe7b0; --sev-advisory-icon: #ffc766;
+  --sev-high-bg: #3b1d12; --sev-high-border: #7a3a22; --sev-high-fg: #ffd8c8; --sev-high-icon: #ff8a5c;
+  --sev-critical-bg: #44131a; --sev-critical-border: #8a2532; --sev-critical-fg: #ffc9cf; --sev-critical-icon: #ff6b75;
+
+  --hero-bg-1: #2d3a0e; --hero-bg-2: #1f240f; --hero-small: #cfe39a; --hero-split: #cfd6c0;
+
+  --toast-bg: rgba(44, 44, 46, .97);
+  --shadow: rgba(0, 0, 0, .45);
+  --scrim: rgba(0, 0, 0, .6);
+  --grabber: #555;
+  --sb-battery-bg: rgba(255, 255, 255, .9);
+  --sb-battery-fg: #111;
+  --home-indicator: rgba(255, 255, 255, .75);
+
   --coral: #f46b6b;           /* driver "Offline" pill */
   --peach: #fdd9b5;           /* driver warning banner */
   --peach-ink: #2a2118;
   --star: #ff9f0a;
 
-  --map-bg: #1b2a44;
-
   --ok: #6fd36b;
   --warn: #ffb547;
   --danger: #ff5a5f;
   --info: #7cb7ff;
+
+  /* fictional map */
+  --map-bg: #1b2a44;
+  --map-block: #20314f;
+  --map-park: #1d3a3a;
+  --map-park-opacity: .55;
+  --map-minor: #2d4569;
+  --map-road: #3c5888;
+  --map-casing: #0e1626;
+  --map-point-stroke: #0e1626;
+  --map-label: #ffffff;
+  --map-label-halo: #0e1626;
+  --map-district: #7f93b8;
+  --map-car: #e9eef5;
+  --map-car-glass: #6c7a8f;
+  --map-pop-bg: #111;
+  --map-pop-title: #fff;
+  --map-pop-text: #c9c9c9;
+  --map-chip-bg: rgba(14, 22, 38, .8);
+  --map-chip-fg: #dfe6f2;
+  --map-chip-border: transparent;
+  --map-hazard-boost: 1;
+  --route-approved: #9be15d;
+  --route-blocked: #ff5a5f;
+  --route-unknown: #a0a7b4;
+  --pt-pickup: #5ee0a0;
+  --pt-shelter: #c1f11d;
+  --pt-blocked: #ff5a5f;
 
   --radius-sheet: 26px;
   --radius-tile: 22px;
@@ -39,13 +124,148 @@
 
   --phone-scale: 1;
 
-  /* stage (presentation shell), not part of the reproduced app */
+  /* stage (presentation shell and Admin panel), not part of the reproduced app */
   --stage-bg: #0b0c0e;
   --stage-panel: #15171b;
   --stage-panel-2: #1c1f24;
+  --stage-sunken: #121418;
   --stage-line: #2a2e35;
+  --stage-line-2: #444a54;
+  --stage-row-line: #22252b;
   --stage-text: #e9ebef;
+  --stage-text-soft: #c9ced6;
   --stage-text-2: #9aa1ad;
+  --stage-btn: #2b2f36;
+  --stage-btn-border: #3a3f47;
+  --stage-shadow: rgba(0, 0, 0, .5);
+  --hot-bg: #3a1c16; --hot-fg: #ffd2c2; --hot-border: #ff8a5c; --hot-soft: #2a1712;
+  --calm-bg: #1e2a14; --calm-fg: #b9e36a;
+  --op-ok-bg: #1f3317; --op-ok-border: #35541f; --op-ok-fg: #b6ec8e;
+  --op-danger-bg: #6e2414; --op-danger-border: #8f341f; --op-danger-fg: #ffe0d6;
+  --actor-passenger: #8fd3ff; --actor-operator: #ffb59c;
 
   color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --lime-text: #4b6b00;
+  --lime-border: #8db800;
+  --lime-soft-bg: #f1f9d4;
+  --lime-soft-border: #b7d94a;
+  --lime-disabled-bg: #e6ebd2;
+  --lime-disabled-fg: #8a9270;
+  --chip-on-bg: #f3fbd6;
+
+  --app-bg: #eef0f2;
+  --sheet: #ffffff;
+  --tile: #f2f3f5;
+  --tile-big: #f2f3f5;
+  --driver-bg: #ffffff;
+  --menu-bg: #ffffff;
+  --menu-active: #f0f1f3;
+  --menu-hover: #f5f6f7;
+  --menu-divider: #e3e5e8;
+  --card: #f2f3f5;
+  --card-border: #e3e5e8;
+  --inset: #ffffff;
+  --inset-border: #e3e5e8;
+  --modal: #ffffff;
+  --line: #e3e5e8;
+  --line-strong: #b9bec5;
+  --track-done: #9cc32a;
+  --mcard-border: #dfe8b8;
+
+  --text: #111111;
+  --text-2: #5f6368;
+  --text-3: #80868b;
+  --icon: #6b7076;
+
+  --btn-round: #ffffff;
+  --btn-round-border: #e3e5e8;
+  --btn-map: #ffffff;
+  --btn-dark: #e9ebee;
+  --btn-dark-text: #111;
+  --seg-bg: #eceef0;
+  --seg-on: #ffffff;
+  --tabbar-bg: #ffffff;
+  --tabbar-border: #e3e5e8;
+  --tabbar-on: #eceef0;
+  --tabbar-text: #111;
+  --pill-bg: rgba(255, 255, 255, .97);
+
+  --ok-text: #2e7d1a;
+  --bad-text: #c62828;
+  --warn-text: #8a5a00;
+  --info-text: #1d5fa8;
+  --badge-info-bg: #e3f0ff; --badge-info-fg: #1d5fa8;
+  --badge-success-bg: #e3f5da; --badge-success-fg: #2e6b12;
+  --badge-warn-bg: #fff1d6; --badge-warn-fg: #8a5a00;
+  --badge-danger-bg: #fde4e4; --badge-danger-fg: #b3261e;
+  --badge-muted-bg: #eceef0; --badge-muted-fg: #5f6368;
+  --danger-soft-bg: #fdecec; --danger-soft-fg: #8c1d18;
+  --warn-soft-bg: #fff4e0; --warn-soft-fg: #6b4500;
+  --disclaimer-bg: #fff4e0; --disclaimer-fg: #5c3d00;
+  --danger-ghost-border: #f0b4b4; --danger-ghost-fg: #c62828;
+
+  --sev-advisory-bg: #fff7e0; --sev-advisory-border: #efd28a; --sev-advisory-fg: #6b4c00; --sev-advisory-icon: #9a6a00;
+  --sev-high-bg: #fff0ea; --sev-high-border: #f3b9a0; --sev-high-fg: #8a2e0b; --sev-high-icon: #d2501f;
+  --sev-critical-bg: #fdecee; --sev-critical-border: #efa7af; --sev-critical-fg: #8c1d2c; --sev-critical-icon: #c62838;
+
+  --hero-bg-1: #f4fbd9; --hero-bg-2: #e9f5c0; --hero-small: #4b6b00; --hero-split: #4f5a2a;
+
+  --toast-bg: rgba(255, 255, 255, .98);
+  --shadow: rgba(0, 0, 0, .14);
+  --scrim: rgba(0, 0, 0, .35);
+  --grabber: #c9ccd1;
+  --sb-battery-bg: #111;
+  --sb-battery-fg: #fff;
+  --home-indicator: rgba(0, 0, 0, .8);
+
+  --map-bg: #e8ecf0;
+  --map-block: #dce1e7;
+  --map-park: #cfe8d3;
+  --map-park-opacity: .9;
+  --map-minor: #f6f8fa;
+  --map-road: #ffffff;
+  --map-casing: #ffffff;
+  --map-point-stroke: #1f2937;
+  --map-label: #111111;
+  --map-label-halo: #ffffff;
+  --map-district: #6b7a90;
+  --map-car: #4a5361;
+  --map-car-glass: #cfd6df;
+  --map-pop-bg: #ffffff;
+  --map-pop-title: #111;
+  --map-pop-text: #5f6368;
+  --map-chip-bg: rgba(255, 255, 255, .92);
+  --map-chip-fg: #2b3340;
+  --map-chip-border: #dfe3e8;
+  --map-hazard-boost: 1.25;
+  --route-approved: #2e9e1f;
+  --route-blocked: #d92d33;
+  --route-unknown: #7a8290;
+  --pt-pickup: #1fb578;
+  --pt-shelter: #c1f11d;
+  --pt-blocked: #d92d33;
+
+  --stage-bg: #f4f5f7;
+  --stage-panel: #ffffff;
+  --stage-panel-2: #f7f8fa;
+  --stage-sunken: #eef0f3;
+  --stage-line: #e1e4e8;
+  --stage-line-2: #c5cad1;
+  --stage-row-line: #eceef1;
+  --stage-text: #15171b;
+  --stage-text-soft: #3c4350;
+  --stage-text-2: #5b6270;
+  --stage-btn: #ffffff;
+  --stage-btn-border: #d5d9df;
+  --stage-shadow: rgba(0, 0, 0, .12);
+  --hot-bg: #fdece6; --hot-fg: #a33a12; --hot-border: #e2703f; --hot-soft: #fff5f1;
+  --calm-bg: #eef7d9; --calm-fg: #3e5c00;
+  --op-ok-bg: #e8f5e0; --op-ok-border: #b5d9a1; --op-ok-fg: #2e6b12;
+  --op-danger-bg: #c4401f; --op-danger-border: #a8361a; --op-danger-fg: #ffffff;
+  --actor-passenger: #1d6fb8; --actor-operator: #b34a1d;
+
+  color-scheme: light;
 }

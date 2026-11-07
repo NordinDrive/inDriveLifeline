@@ -1,20 +1,10 @@
-import type { BonusRecord, BonusStatus, ServiceType } from './types';
+import type { BonusRecord, BonusStatus } from './types';
 
 // Fictional illustrative amounts (MAD). Not an inDrive rate card or incentive policy.
-export const EARNINGS_TABLE: Record<ServiceType, { base: number; bonus: number }> = {
-  evacuation_transfer: { base: 25, bonus: 15 },
-  transport_assistance: { base: 30, bonus: 10 },
-  essential_delivery: { base: 25, bonus: 15 },
-  donation_pickup: { base: 20, bonus: 10 },
-  ngo_logistics: { base: 35, bonus: 10 },
-};
+// The trip fare and the Lifeline bonus are always shown as separate lines.
+export const LIFELINE_EARNINGS = { base: 25, bonus: 15 } as const;
 
 export const BONUS_BUDGET = 5000;
-
-export function earningsFor(service: ServiceType) {
-  const { base, bonus } = EARNINGS_TABLE[service];
-  return { base, bonus, total: base + bonus };
-}
 
 /** The bonus can only be approved once, after a confirmed completion, and never while held. */
 export function canApproveBonus(record: BonusRecord | undefined, missionConfirmed: boolean): { ok: boolean; reason?: string } {

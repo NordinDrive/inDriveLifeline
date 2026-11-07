@@ -13,25 +13,24 @@ export function Earnings() {
 
   return (
     <div className="screen scroll ll">
-      <ScreenHeader title="Mission Earnings" subtitle="Lifeline · simulated amounts" onBack={() => setUi('driver', { screen: 'lifeline' })} />
+      <ScreenHeader title="Earnings history" subtitle="Lifeline · simulated amounts" onBack={() => setUi('driver', { screen: 'lifeline' })} />
       <div className="earn-hero">
-        <small>Total simulated earned</small>
-        <strong>{t.approvedBase + t.approvedBonus} MAD</strong>
+        <small>Lifeline bonuses approved</small>
+        <strong>{t.approvedBonus} MAD</strong>
         <div className="earn-split">
-          <span>Base {t.approvedBase} MAD</span>
-          <span className="lime">Bonus {t.approvedBonus} MAD</span>
-          <span>Pending {t.pendingBase + t.pendingBonus} MAD</span>
+          <span>Bonus pending {t.pendingBonus} MAD</span>
+          <span>Trip fares {t.approvedBase} MAD (+{t.pendingBase} pending)</span>
         </div>
       </div>
-      <h4 className="list-title">Bonus history</h4>
+      <h4 className="list-title">Missions</h4>
       {records.length ? (
         records.map((b) => {
-          const m = domain.missions.find((x) => x.id === b.missionId)!;
+          const m = domain.missions.find((x) => x.id === b.missionId) ?? { id: b.missionId };
           return (
             <div key={b.missionId} className="hist-row">
               <span>
-                <strong>{SERVICE_LABEL[m.service]}</strong>
-                <small>{b.missionId} · {b.base} + {b.bonus} MAD · {shortTime(b.updatedAt)}</small>
+                <strong>{SERVICE_LABEL} · bonus +{b.bonus} MAD</strong>
+                <small>{m.id} · trip fare {b.base} MAD (separate) · {shortTime(b.updatedAt)}</small>
                 {b.heldReason && <small>Held: {b.heldReason}</small>}
               </span>
               <Badge tone={b.status === 'approved' ? 'success' : b.status === 'held' ? 'warn' : b.status === 'not_eligible' ? 'danger' : 'muted'}>{BONUS_LABEL[b.status]}</Badge>
@@ -41,7 +40,7 @@ export function Earnings() {
       ) : (
         <p className="d-empty">No Lifeline missions yet.</p>
       )}
-      <p className="fine pad">Bonuses are approved once per mission after confirmed completion. No real payment, banking data or transfer is involved.</p>
+      <p className="fine pad">Bonuses stay pending until the Admin confirms completion, are approved once per mission, and are never paid for cancelled missions. Simulated: no real payment, banking data or transfer.</p>
       <div className="ll-foot"><DemoTag>Illustrative / Demo Data</DemoTag></div>
     </div>
   );

@@ -1,16 +1,25 @@
-import { Accessibility, Package, Route, ShieldCheck, Users } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Accessibility, MapPin, Route, ShieldCheck, Users } from 'lucide-react';
 import { pointById, routeById } from '../data/mockLocations';
 import { routeDistanceKm, routeStatusById } from '../domain/hazard';
-import { isTransport } from '../domain/eligibility';
+import { ACCESSIBILITY_LABEL } from '../domain/labels';
 import type { DomainState, Mission } from '../domain/types';
 import { SERVICE_LABEL } from '../domain/workflow';
 import { Badge, Reasons } from './ui';
 
 export function missionSource(state: DomainState, m: Mission): string {
   const req = state.requests.find((r) => r.id === m.requestId);
-  if (!req) return 'Lifeline';
-  if (req.ngoId) return state.ngos.find((n) => n.id === req.ngoId)?.name ?? 'NGO partner';
-  return req.source === 'passenger' ? 'Passenger request' : 'Lifeline coordinator';
+  return req ? req.requesterLabel : 'Lifeline';
+}
+
+/** Trip fare and Lifeline bonus, always on separate lines. */
+export function EarningsLines({ base, bonus, status }: { base: number; bonus: number; status?: ReactNode }) {
+  return (
+    <div className="earn">
+      <div className="earn-bonus"><span>Lifeline bonus</span><strong>+{bonus} MAD {status}</strong></div>
+      <div><span>Trip fare (separate from bonus)</span><strong>{base} MAD</strong></div>
+    </div>
+  );
 }
 
 interface Props {
@@ -26,37 +35,31 @@ interface Props {
 export function MissionCard({ state, mission, reasons, onAccept, onDecline, onDetails }: Props) {
   const route = routeById(mission.routeId);
   const st = routeStatusById(mission.routeId, state.disaster);
-  const transport = isTransport(mission.service);
   return (
     <article className="mcard">
       <header className="mcard-head">
         <Badge tone="lime">Lifeline</Badge>
-        <span className="mcard-type">{SERVICE_LABEL[mission.service]}</span>
+        <span className="mcard-type">{SERVICE_LABEL}</span>
+        <span className="mcard-id">{mission.id}</span>
       </header>
-      <p className="mcard-source">{missionSource(state, mission)} · {mission.id}</p>
-      <div className="mcard-route">
-        <div><span className="dot dot--from" />{pointById(mission.pickupId)?.label}</div>
-        <div><span className="dot dot--to" />{pointById(mission.destinationId)?.label}</div>
-      </div>
-      <div className="mcard-meta">
-        <span><Route size={15} />{routeDistanceKm(route)} km · {route?.id}</span>
-        <span>{transport ? <><Users size={15} />{mission.passengers} pax</> : <><Package size={15} />{mission.load}</>}</span>
-        {mission.accessibility !== 'none' && <span><Accessibility size={15} />{mission.accessibility === 'wheelchair' ? 'Wheelchair' : 'Reduced mobility'}</span>}
-      </div>
-      <div className="earn">
-        <div><span>Base mission compensation</span><strong>{mission.baseCompensation} MAD</strong></div>
-        <div className="earn-bonus"><span>Lifeline bonus</span><strong>+{mission.bonus} MAD</strong></div>
-        <div className="earn-total"><span>Total potential earnings</span><strong>{mission.baseCompensation + mission.bonus} MAD</strong></div>
-      </div>
-      <div className={`mcard-safety ${st === 'approved' ? '' : 'is-bad'}`}>
-        <ShieldCheck size={16} />
-        {st === 'approved' ? 'Approved fictional route' : `Route ${st}: dispatch unavailable`}
-      </div>
+      <dl className="mcard-facts">
+        <div><dt><MapPin size={14} />Pickup point</dt><dd>{pointById(mission.pickupId)?.label}</dd></div>
+        <div><dt><ShieldCheck size={14} />Destination shelter</dt><dd>{pointById(mission.destinationId)?.label}</dd></div>
+        <div><dt><Users size={14} />Passengers</dt><dd>{mission.passengers}</dd></div>
+        <div><dt><Accessibility size={14} />Accessibility</dt><dd>{ACCESSIBILITY_LABEL[mission.accessibility]}</dd></div>
+        <div className="mcard-wide">
+          <dt><Route size={14} />Route</dt>
+          <dd className={st === 'approved' ? 'ok' : 'bad'}>
+            {route?.id} · {route?.label} · {routeDistanceKm(route)} km · {st === 'approved' ? 'Approved' : `${st[0].toUpperCase()}${st.slice(1)}: unavailable`}
+          </dd>
+        </div>
+      </dl>
+      <EarningsLines base={mission.baseCompensation} bonus={mission.bonus} />
       <Reasons reasons={reasons} title="You can’t accept yet" />
       <div className="mcard-actions">
         <button className="btn-lime" onClick={onAccept} disabled={reasons.length > 0}>Accept</button>
         <button className="btn-dark" onClick={onDecline}>Decline</button>
-        <button className="btn-link" onClick={onDetails}>View details</button>
+        <button className="btn-link" onClick={onDetails}>View details · decline carries no penalty</button>
       </div>
     </article>
   );

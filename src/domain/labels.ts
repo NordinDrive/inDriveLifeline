@@ -1,9 +1,9 @@
-import type { BonusStatus, DriverEligibility, Mission, MissionStatus, PassengerRequest, RequestStatus, Tone } from './types';
+import type { AccessibilityNeed, BonusStatus, DriverEligibility, Mission, MissionStatus, PassengerRequest, RequestStatus, Tone } from './types';
 
 export const ELIGIBILITY_LABEL: Record<DriverEligibility, string> = {
   not_enrolled: 'Not Enrolled',
   pending_review: 'Pending Review',
-  verified: 'Lifeline Verified',
+  verified: 'Verified Volunteer',
   suspended: 'Suspended',
   expired: 'Expired',
 };
@@ -25,9 +25,7 @@ export const BONUS_LABEL: Record<BonusStatus, string> = {
 };
 
 export const REQUEST_LABEL: Record<RequestStatus, string> = {
-  submitted: 'Submitted',
   under_review: 'Needs Review',
-  verified: 'Verified',
   approved: 'Approved',
   rejected: 'Rejected',
   cancelled: 'Cancelled',
@@ -35,30 +33,28 @@ export const REQUEST_LABEL: Record<RequestStatus, string> = {
 };
 
 export const MISSION_LABEL: Record<MissionStatus, string> = {
-  pending_offer: 'Pending offer',
-  offered: 'Offered',
+  offered: 'Waiting for volunteer',
   accepted: 'Accepted',
-  en_route: 'On my way',
+  en_route: 'On the way',
   at_pickup: 'At pickup',
-  onboard: 'Onboard',
-  arrived: 'Arrived',
+  onboard: 'Passengers picked up',
+  arrived: 'Arrived at shelter',
   awaiting_confirmation: 'Awaiting confirmation',
   confirmed: 'Confirmed',
   cancelled: 'Cancelled',
   blocked: 'Blocked',
 };
 
-/** Customer-facing tracker steps for the passenger (spec §5.4). */
+/** Passenger tracker steps. Steps before the current index are done. */
 export const TRACKER_STEPS = [
   'Submitted',
-  'Needs Review',
-  'Approved',
-  'Searching for Driver',
-  'Driver Assigned',
-  'On the Way',
-  'Picked Up',
-  'Arrived',
-  'Confirmed',
+  'Admin review',
+  'Route approved',
+  'Volunteer driver assigned',
+  'Driver on the way',
+  'Picked up',
+  'Arrived at shelter',
+  'Admin confirmed',
 ] as const;
 
 export function trackerIndex(req: PassengerRequest, mission: Mission | undefined): number {
@@ -66,19 +62,24 @@ export function trackerIndex(req: PassengerRequest, mission: Mission | undefined
     const map: Partial<Record<MissionStatus, number>> = {
       offered: 3,
       accepted: 4,
-      en_route: 5,
+      en_route: 4,
       at_pickup: 5,
       onboard: 6,
       arrived: 7,
       awaiting_confirmation: 7,
-      confirmed: 9,
+      confirmed: TRACKER_STEPS.length,
     };
     return map[mission.status] ?? 3;
   }
-  if (req.status === 'approved') return 2;
-  if (req.status === 'verified' || req.status === 'under_review') return 1;
-  return 0;
+  if (req.status === 'approved') return 3;
+  return 1;
 }
+
+export const ACCESSIBILITY_LABEL: Record<AccessibilityNeed, string> = {
+  none: 'No accessibility needs',
+  wheelchair: 'Wheelchair accessible vehicle',
+  reduced_mobility: 'Reduced mobility',
+};
 
 export function shortTime(iso: string | undefined): string {
   if (!iso) return '';

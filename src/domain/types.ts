@@ -1,5 +1,7 @@
 // Domain model for the Lifeline simulation. Everything here describes
 // fictional demo state only: no real people, roads, payouts or alerts.
+// Lifeline has one job: voluntary transport from a designated pickup point to
+// an approved shelter while an Admin-activated disaster scenario is running.
 
 export type DisasterType = 'earthquake' | 'flood' | 'wildfire' | 'storm';
 export type Severity = 'advisory' | 'high' | 'critical';
@@ -9,26 +11,12 @@ export type DriverEligibility = 'not_enrolled' | 'pending_review' | 'verified' |
 export type BonusStatus = 'not_eligible' | 'pending_completion' | 'pending_confirmation' | 'approved' | 'held';
 export type DistrictId = 'A' | 'B' | 'C';
 
-export type ServiceType =
-  | 'evacuation_transfer'
-  | 'transport_assistance'
-  | 'essential_delivery'
-  | 'donation_pickup'
-  | 'ngo_logistics';
+/** Who created the request: the demo passenger phone, or a simulated resident (Admin tool). */
+export type RequestSource = 'passenger' | 'resident';
 
-export type RequestSource = 'passenger' | 'ngo' | 'hotline' | 'shelter' | 'coordinator';
-
-export type RequestStatus =
-  | 'submitted'
-  | 'under_review'
-  | 'verified'
-  | 'approved'
-  | 'rejected'
-  | 'cancelled'
-  | 'blocked';
+export type RequestStatus = 'under_review' | 'approved' | 'rejected' | 'cancelled' | 'blocked';
 
 export type MissionStatus =
-  | 'pending_offer'
   | 'offered'
   | 'accepted'
   | 'en_route'
@@ -41,8 +29,7 @@ export type MissionStatus =
   | 'blocked';
 
 export type AccessibilityNeed = 'none' | 'wheelchair' | 'reduced_mobility';
-export type FundingSource = 'ngo' | 'sponsor' | 'volunteer' | 'indrive';
-export type Actor = 'passenger' | 'driver' | 'operator' | 'ngo' | 'system';
+export type Actor = 'passenger' | 'driver' | 'operator' | 'system';
 export type Tone = 'info' | 'success' | 'warn' | 'danger';
 
 export interface Point {
@@ -59,9 +46,9 @@ export interface District {
 export interface SafePoint {
   id: string;
   label: string;
-  kind: 'pickup' | 'shelter' | 'logistics';
+  kind: 'pickup' | 'shelter';
   districtId: DistrictId;
-  /** Fictional, operator-controlled simulation flag. Not a real safety assessment. */
+  /** Fictional, Admin-controlled simulation flag. Not a real safety assessment. */
   approved: boolean;
   mapX: number;
   mapY: number;
@@ -111,6 +98,8 @@ export interface Driver {
   accessible: boolean;
   districtId: DistrictId;
   online: boolean;
+  /** Volunteer's own choice to receive Lifeline missions (separate from going online). */
+  available: boolean;
   rating: string;
   training: { safety: boolean; conduct: boolean; vehicleCheck: boolean };
   /** True for the driver shown on the Driver phone. */
@@ -121,21 +110,13 @@ export interface PassengerRequest {
   id: string;
   source: RequestSource;
   requesterId?: string;
-  ngoId?: string;
-  campaignId?: string;
-  beneficiaryLabel: string;
-  service: ServiceType;
+  requesterLabel: string;
   pickupId: string;
   destinationId: string;
   routeId?: string;
   passengers: number;
-  load?: string;
   accessibility: AccessibilityNeed;
-  note: string;
-  funding: FundingSource;
   status: RequestStatus;
-  verified: boolean;
-  routeApproved: boolean;
   reason?: string;
   missionId?: string;
   createdAt: string;
@@ -144,18 +125,15 @@ export interface PassengerRequest {
 export interface Mission {
   id: string;
   requestId: string;
-  service: ServiceType;
   pickupId: string;
   destinationId: string;
   routeId: string;
   passengers: number;
-  load?: string;
   accessibility: AccessibilityNeed;
   status: MissionStatus;
   driverId?: string;
   baseCompensation: number;
   bonus: number;
-  funding: FundingSource;
   declinedBy: string[];
   safetyHold?: { reason: string; source: 'system' | 'driver' };
   blockedReason?: string;
@@ -165,23 +143,6 @@ export interface Mission {
   acceptedAt?: string;
   completedAt?: string;
   confirmedAt?: string;
-}
-
-export interface NgoPartner {
-  id: string;
-  name: string;
-  verified: boolean;
-  focus: string;
-}
-
-export interface Campaign {
-  id: string;
-  ngoId: string;
-  name: string;
-  goal: number;
-  unit: string;
-  /** Fictional deliveries completed before the demo starts. */
-  baselineCompleted: number;
 }
 
 export interface BonusRecord {
@@ -216,24 +177,21 @@ export interface DomainState {
   requests: PassengerRequest[];
   missions: Mission[];
   bonuses: Record<string, BonusRecord>;
-  ngos: NgoPartner[];
-  campaigns: Campaign[];
   events: EventLogEntry[];
   counters: { request: number; mission: number; event: number };
 }
 
 export interface ImpactMetrics {
   requestsReceived: number;
-  requestsVerified: number;
-  approvedMissions: number;
+  approvedRequests: number;
   confirmedMissions: number;
   peopleTransported: number;
-  deliveriesCompleted: number;
-  activeVerifiedDrivers: number;
-  ngoPartnerMissions: number;
+  verifiedVolunteers: number;
+  availableVolunteers: number;
   blockedRequests: number;
   bonusesApprovedCount: number;
   bonusesApprovedTotal: number;
+  bonusesPendingTotal: number;
   bonusBudget: number;
   medianAcceptSeconds: number | null;
 }

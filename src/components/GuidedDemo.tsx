@@ -1,10 +1,10 @@
 import { ChevronLeft, ChevronRight, Play, RotateCcw } from 'lucide-react';
 import { useDemo } from '../app/store';
 import { PHONE_DRIVER_ID } from '../data/mockDrivers';
-import { PASSENGER } from '../data/mockNGOs';
+import { PASSENGER } from '../data/mockPassenger';
 import * as wf from '../domain/workflow';
 
-// Presenter script (spec §21). "Do it" runs the step's simulated action; nothing
+// Presenter script. "Do it" runs the step's simulated action; nothing
 // auto-plays. Every action goes through the same guarded workflow as manual clicks.
 
 const S = () => useDemo.getState();
@@ -27,141 +27,100 @@ interface Step {
 
 export const GUIDE_STEPS: Step[] = [
   {
-    title: 'Two familiar apps, side by side',
-    detail: 'Passenger app on the left, Driver app on the right, operator remote on the side. All share one live state.',
+    title: 'Lifeline starts inactive',
+    detail: 'Familiar inDrive apps. Lifeline sits under “City to City”; until the Admin activates it, passengers only see an inactive message.',
     run: () => {
-      S().setUi('passenger', { screen: 'home', menuOpen: false });
+      S().setUi('passenger', { screen: 'lifeline', menuOpen: false });
       S().setUi('driver', { screen: 'home', menuOpen: false });
+      S().setUi('operator', { tab: 'scenario' });
     },
   },
   {
-    title: 'Lifeline sits under “City to City”',
-    detail: 'Open both side menus. Lifeline is a native row, same size and style as its neighbours.',
+    title: 'A driver volunteers for Lifeline',
+    detail: 'Extra checks (training, conduct, vehicle), Admin verification, then the volunteer switches on “Available for Lifeline missions”.',
     run: () => {
-      S().setUi('passenger', { menuOpen: true });
-      S().setUi('driver', { menuOpen: true });
-    },
-  },
-  {
-    title: 'Drivers need extra verification',
-    detail: 'The driver opens Lifeline: an inDrive account alone is not enough to accept missions.',
-    run: () => {
-      S().setUi('passenger', { menuOpen: false });
-      S().setUi('driver', { menuOpen: false, screen: 'lifeline' });
-    },
-  },
-  {
-    title: 'Driver applies to the Partner Program',
-    detail: 'Training, Code of Conduct and vehicle capability are recorded (simulated).',
-    run: () => {
-      S().perform((s, now) => wf.applyForLifeline(s, PHONE_DRIVER_ID, { safetyTraining: true, conductAccepted: true, vehicleChecked: true, seats: 3, accessible: false }, now));
+      const d = S().domain.drivers[PHONE_DRIVER_ID];
+      if (['not_enrolled', 'expired'].includes(d.eligibility))
+        S().perform((s, now) => wf.applyForLifeline(s, PHONE_DRIVER_ID, { safetyTraining: true, conductAccepted: true, vehicleChecked: true, seats: 3, accessible: false }, now));
+      if (S().domain.drivers[PHONE_DRIVER_ID].eligibility === 'pending_review') S().perform((s, now) => wf.approveDriver(s, PHONE_DRIVER_ID, now));
+      if (!S().domain.drivers[PHONE_DRIVER_ID].available) S().perform((s, now) => wf.setLifelineAvailability(s, PHONE_DRIVER_ID, true, now));
       S().setUi('driver', { screen: 'lifeline' });
       S().setUi('operator', { tab: 'drivers' });
     },
   },
   {
-    title: 'Operator approves: Lifeline Verified',
-    detail: 'A simulated eligibility review in the Drivers tab.',
-    run: () => {
-      S().perform((s, now) => wf.approveDriver(s, PHONE_DRIVER_ID, now));
-    },
-  },
-  {
-    title: 'Driver goes online',
-    detail: 'Only online, verified drivers with matching capacity can receive missions.',
-    run: () => {
-      if (!S().domain.drivers[PHONE_DRIVER_ID].online) S().perform((s, now) => wf.setDriverOnline(s, PHONE_DRIVER_ID, true, now));
-      S().setUi('driver', { screen: 'home' });
-    },
-  },
-  {
-    title: 'Activate: Earthquake · District A · High',
-    detail: 'Both phones receive a SIMULATED alert at the same moment.',
+    title: 'Admin activates a disaster',
+    detail: 'Earthquake · Demo District A · High. Both phones get a SIMULATED alert; ROUTE-A1 is approved, ROUTE-B2 is blocked.',
     run: () => {
       S().setUi('operator', { tab: 'scenario' });
-      S().perform((s, now) => wf.activateScenario(s, { type: 'earthquake', districtId: 'A', severity: 'high', name: '' }, now));
+      if (S().domain.disaster.status !== 'active')
+        S().perform((s, now) => wf.activateScenario(s, { type: 'earthquake', districtId: 'A', severity: 'high', name: '' }, now));
     },
   },
   {
-    title: 'Hazard zone, safe points and routes',
-    detail: 'ROUTE-A1 (west corridor) is approved; ROUTE-B2 crosses the affected zone and is blocked.',
+    title: 'Passenger requests shelter transport',
+    detail: 'Assembly Point Alpha → Shelter Green, 3 people. It goes to the Admin for review, not straight to drivers.',
     run: () => {
       const rev = S().domain.disaster.revision;
-      S().setUi('passenger', { alertSeenRevision: rev, screen: 'lifeline' });
-      S().setUi('driver', { alertSeenRevision: rev, screen: 'home' });
-    },
-  },
-  {
-    title: 'Passenger requests safe transport for 3',
-    detail: 'Assembly Point Alpha → Shelter Green. It goes to the operator queue, not straight to drivers.',
-    run: () => {
-      S().perform((s, now) =>
-        wf.submitRequest(s, { source: 'passenger', requesterId: PASSENGER.id, service: 'evacuation_transfer', pickupId: 'P-ALPHA', destinationId: 'S-GREEN', passengers: 3, accessibility: 'none', note: '', acknowledged: true }, now),
-      );
-      S().setUi('passenger', { screen: 'track' });
+      S().setUi('driver', { alertSeenRevision: rev });
+      if (!myRequest())
+        S().perform((s, now) =>
+          wf.submitRequest(s, { source: 'passenger', requesterId: PASSENGER.id, pickupId: 'P-ALPHA', destinationId: 'S-GREEN', passengers: 3, accessibility: 'none' }, now),
+        );
+      S().setUi('passenger', { alertSeenRevision: rev, screen: 'track' });
       S().setUi('operator', { tab: 'queue', selectedRequestId: myRequest()?.id });
     },
   },
   {
-    title: 'Operator verifies the need',
-    detail: 'Simulated verification by a coordinator.',
+    title: 'Admin approves the route',
+    detail: 'All safety checks pass, so the mission is published to available volunteers at Assembly Point Alpha.',
     run: () => {
       const r = myRequest();
-      if (r) S().perform((s, now) => wf.verifyNeed(s, r.id, now));
-    },
-  },
-  {
-    title: 'Operator approves ROUTE-A1',
-    detail: 'Only predefined routes that are approved in the scenario can be approved.',
-    run: () => {
-      const r = myRequest();
-      if (r) S().perform((s, now) => wf.approveRoute(s, r.id, now));
-    },
-  },
-  {
-    title: 'Offer to eligible drivers',
-    detail: 'All dispatch gates pass, so the mission appears on the Driver phone instantly.',
-    run: () => {
-      const r = myRequest();
-      if (r) S().perform((s, now) => wf.offerMission(s, r.id, now));
+      if (r && r.status !== 'approved') S().perform((s, now) => wf.approveRequest(s, r.id, now));
       S().setUi('driver', { screen: 'lifeline' });
     },
   },
   {
-    title: 'Driver accepts: 25 MAD + 15 MAD bonus',
-    detail: 'Passenger sees “Driver assigned” immediately.',
+    title: 'Volunteer driver accepts',
+    detail: 'The card showed pickup, shelter, 3 passengers, accessibility, the approved route and the +15 MAD bonus before accepting.',
     run: () => {
       const m = myMission();
-      if (m) {
+      if (m?.status === 'offered') {
         const out = S().perform((s, now) => wf.acceptMission(s, m.id, PHONE_DRIVER_ID, now));
         if (out.ok) S().setUi('driver', { screen: 'active', missionId: m.id });
       }
     },
   },
   {
-    title: 'Driver picks up the family',
-    detail: 'On my way → Arrived at pickup → Passengers picked up. Each step updates the passenger tracker.',
+    title: 'Pickup',
+    detail: 'On my way → Arrived at pickup → Passengers picked up. The passenger tracker updates at each step.',
     run: () => advanceTo('onboard'),
   },
   {
-    title: 'Arrive at shelter, submit completion',
-    detail: 'The bonus stays pending until the coordinator confirms.',
-    run: () => advanceTo('awaiting_confirmation'),
+    title: 'Shelter arrival',
+    detail: 'Arrived at shelter → Submit completion. The passenger confirms safe arrival; the bonus is still pending.',
+    run: () => {
+      advanceTo('awaiting_confirmation');
+      const m = myMission();
+      if (m && !m.passengerConfirmed) S().perform((s, now) => wf.passengerConfirmArrival(s, m.id, now));
+    },
   },
   {
-    title: 'Operator confirms safe arrival',
-    detail: 'Bonus approved once; impact counters update.',
+    title: 'Admin confirms → bonus approved',
+    detail: 'Confirmation approves the 15 MAD bonus exactly once. It now shows as approved in the driver’s earnings history.',
     run: () => {
       const m = myMission();
-      if (m) S().perform((s, now) => wf.confirmCompletion(s, m.id, now));
+      if (m?.status === 'awaiting_confirmation') S().perform((s, now) => wf.confirmCompletion(s, m.id, now));
+      S().setUi('driver', { screen: 'earnings' });
       S().setUi('operator', { tab: 'impact' });
     },
   },
   {
-    title: 'Resolve the scenario',
-    detail: 'Alerts clear; completed history stays until reset. Lifeline continues for everyday NGO logistics.',
+    title: 'Admin resolves the scenario',
+    detail: 'New requests and offers stop; completed trips and earnings stay until Reset.',
     run: () => {
-      S().perform((s, now) => wf.resolveScenario(s, now));
+      if (S().domain.disaster.status === 'active') S().perform((s, now) => wf.resolveScenario(s, now));
+      S().setUi('passenger', { screen: 'lifeline' });
     },
   },
 ];

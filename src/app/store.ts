@@ -2,13 +2,15 @@ import { create } from 'zustand';
 import { createInitialState } from '../data/initialState';
 import type { DomainState, Notice, Outcome, Tone } from '../domain/types';
 
-// One shared store for Passenger, Driver and Operator. Every view reads the same
+// One shared store for Passenger, Driver and Admin. Every view reads the same
 // object, so updates are immediate. Business rules live in src/domain; the store
 // only applies their outcomes and shows notices.
 
 export type PassengerScreen = 'home' | 'lifeline' | 'request' | 'track' | 'how';
 export type DriverScreen = 'home' | 'lifeline' | 'enroll' | 'mission' | 'active' | 'earnings';
-export type OperatorTab = 'scenario' | 'queue' | 'drivers' | 'ngo' | 'impact' | 'log';
+export type OperatorTab = 'scenario' | 'queue' | 'drivers' | 'impact' | 'log';
+export type Theme = 'dark' | 'light';
+const OPERATOR_TABS: OperatorTab[] = ['scenario', 'queue', 'drivers', 'impact', 'log'];
 export type ToastTarget = Notice['target'] | 'stage';
 
 export interface UiState {
@@ -17,7 +19,6 @@ export interface UiState {
     menuOpen: boolean;
     alertSeenRevision: number;
     info?: string;
-    requestPreset?: 'evacuation_transfer' | 'transport_assistance' | 'essential_delivery';
   };
   driver: {
     screen: DriverScreen;
@@ -28,7 +29,7 @@ export interface UiState {
     homeTab: 'requests' | 'performance';
   };
   operator: { tab: OperatorTab; selectedRequestId?: string };
-  stage: { presentation: boolean; guideOpen: boolean; guideStep: number; mobileView: 'passenger' | 'driver' | 'operator' };
+  stage: { presentation: boolean; guideOpen: boolean; guideStep: number; mobileView: 'passenger' | 'driver' | 'operator'; theme: Theme };
 }
 
 export interface Toast {
@@ -43,7 +44,7 @@ export function createInitialUi(): UiState {
     passenger: { screen: 'home', menuOpen: false, alertSeenRevision: 0 },
     driver: { screen: 'home', menuOpen: false, alertSeenRevision: 0, homeTab: 'requests' },
     operator: { tab: 'scenario' },
-    stage: { presentation: false, guideOpen: true, guideStep: 0, mobileView: 'passenger' },
+    stage: { presentation: false, guideOpen: true, guideStep: 0, mobileView: 'passenger', theme: 'dark' },
   };
 }
 
@@ -58,19 +59,36 @@ interface Store {
   resetDemo: () => void;
 }
 
-const STORAGE_KEY = 'indrive-lifeline-demo-v1';
+// v2: disaster-only shelter transport. Older saves (with NGO desk, campaigns and
+// everyday missions) are discarded rather than migrated.
+const STORAGE_KEY = 'indrive-lifeline-demo-v2';
+const LEGACY_KEYS = ['indrive-lifeline-demo-v1'];
 const CHANNEL = 'indrive-lifeline-demo';
 const tabId = Math.random().toString(36).slice(2);
 let toastSeq = 0;
 let applyingRemote = false;
 
+/** Accepts only saves in the current shape; anything else falls back to a clean reset. */
+function sanitize(parsed: unknown): Pick<Store, 'domain' | 'ui'> | null {
+  const p = parsed as { domain?: Partial<DomainState> & Record<string, unknown>; ui?: UiState } | null;
+  const d = p?.domain;
+  if (!d?.counters || !d.disaster || !Array.isArray(d.requests) || !Array.isArray(d.missions) || !p?.ui?.stage) return null;
+  if ('ngos' in d || 'campaigns' in d || d.missions.some((m) => 'service' in m)) return null;
+  const fresh = createInitialUi();
+  const ui: UiState = {
+    passenger: { ...fresh.passenger, ...p.ui.passenger },
+    driver: { ...fresh.driver, ...p.ui.driver },
+    operator: OPERATOR_TABS.includes(p.ui.operator?.tab) ? p.ui.operator : fresh.operator,
+    stage: { ...fresh.stage, ...p.ui.stage, theme: p.ui.stage.theme === 'light' ? 'light' : 'dark' },
+  };
+  return { domain: d as DomainState, ui };
+}
+
 function loadPersisted(): Pick<Store, 'domain' | 'ui'> | null {
   try {
+    for (const key of LEGACY_KEYS) localStorage.removeItem(key);
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed?.domain?.counters || !parsed?.ui?.stage) return null;
-    return { domain: parsed.domain, ui: parsed.ui };
+    return raw ? sanitize(JSON.parse(raw)) : null;
   } catch {
     return null;
   }
@@ -109,7 +127,7 @@ export const useDemo = create<Store>((set, get) => ({
     const ui = createInitialUi();
     ui.stage = { ...get().ui.stage, guideStep: 0 };
     set({ domain: createInitialState(), ui, toasts: [] });
-    get().toast('stage', 'Demo reset to its initial state', 'success');
+    get().toast('stage', 'Demo reset: Lifeline inactive, no requests or missions', 'success');
   },
 }));
 
@@ -130,9 +148,12 @@ if (typeof window !== 'undefined') {
 
   const applyRemote = (payload: string) => {
     try {
-      const parsed = JSON.parse(payload);
+      const clean = sanitize(JSON.parse(payload));
+      if (!clean) return;
       applyingRemote = true;
-      useDemo.setState({ domain: parsed.domain, ui: parsed.ui });
+      useDemo.setState(clean);
+    } catch {
+      /* ignore malformed messages */
     } finally {
       applyingRemote = false;
     }

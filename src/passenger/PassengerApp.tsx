@@ -1,5 +1,6 @@
 import { useDemo } from '../app/store';
-import { PASSENGER } from '../data/mockNGOs';
+import { PASSENGER } from '../data/mockPassenger';
+import { lifelineOpenIn } from '../domain/dispatch';
 import { PhoneFrame } from '../components/PhoneFrame';
 import { AlertSheet, InfoSheet, PhoneToasts } from '../components/PhoneOverlays';
 import { PASSENGER_MENU, SideMenu } from '../components/SideMenu';
@@ -13,6 +14,7 @@ export function PassengerApp() {
   const setUi = useDemo((s) => s.setUi);
   const toast = useDemo((s) => s.toast);
   const revision = useDemo((s) => s.domain.disaster.revision);
+  const inArea = useDemo((s) => lifelineOpenIn(s.domain, PASSENGER.districtId));
   const go = (patch: Partial<typeof ui>) => setUi('passenger', { menuOpen: false, ...patch });
 
   const onSelect = (key: string) => {
@@ -44,10 +46,11 @@ export function PassengerApp() {
       />
       <AlertSheet
         role="passenger"
+        hidden={!inArea}
         seenRevision={ui.alertSeenRevision}
         onDismiss={() => setUi('passenger', { alertSeenRevision: revision })}
         primary={{
-          label: 'View safe pickup points',
+          label: 'Open Lifeline',
           onClick: () => go({ alertSeenRevision: revision, screen: 'lifeline' }),
         }}
       />

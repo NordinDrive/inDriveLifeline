@@ -3,8 +3,9 @@ import { useDemo } from '../app/store';
 import { PHONE_DRIVER_ID } from '../data/mockDrivers';
 import { pointById } from '../data/mockLocations';
 import { FictionalMap } from '../components/FictionalMap';
-import { missionSource } from '../components/MissionCard';
+import { EarningsLines, missionSource } from '../components/MissionCard';
 import { DemoTag, ScreenHeader } from '../components/ui';
+import { ACCESSIBILITY_LABEL } from '../domain/labels';
 import { acceptGates } from '../domain/dispatch';
 import { routeById } from '../data/mockLocations';
 import { routeDistanceKm } from '../domain/hazard';
@@ -30,18 +31,14 @@ export function MissionDetails() {
 
   return (
     <div className="screen scroll ll">
-      <ScreenHeader title={SERVICE_LABEL[mission.service]} subtitle={`${mission.id} · ${missionSource(domain, mission)}`} onBack={() => setUi('driver', { screen: 'lifeline' })} />
+      <ScreenHeader title={SERVICE_LABEL} subtitle={`${mission.id} · ${missionSource(domain, mission)}`} onBack={() => setUi('driver', { screen: 'lifeline' })} />
       <div className="trk-map"><FictionalMap variant="card" highlightRouteId={mission.routeId} focusPointIds={[mission.pickupId, mission.destinationId]} showLegend /></div>
       <div className="trk-route">
         <div><span className="dot dot--from" />{pointById(mission.pickupId)?.label}</div>
         <div><span className="dot dot--to" />{pointById(mission.destinationId)?.label}</div>
-        <small>{routeDistanceKm(routeById(mission.routeId))} km indicative · {mission.passengers ? `${mission.passengers} passengers` : mission.load}</small>
+        <small>{routeDistanceKm(routeById(mission.routeId))} km indicative · {mission.passengers} passenger{mission.passengers > 1 ? 's' : ''} · {ACCESSIBILITY_LABEL[mission.accessibility]}</small>
       </div>
-      <div className="earn">
-        <div><span>Base mission compensation</span><strong>{mission.baseCompensation} MAD</strong></div>
-        <div className="earn-bonus"><span>Lifeline bonus</span><strong>+{mission.bonus} MAD</strong></div>
-        <div className="earn-total"><span>Total potential earnings</span><strong>{mission.baseCompensation + mission.bonus} MAD</strong></div>
-      </div>
+      <EarningsLines base={mission.baseCompensation} bonus={mission.bonus} />
       <div className="ll-card">
         <h4>Dispatch checks</h4>
         <ul className="gates">
@@ -53,7 +50,7 @@ export function MissionDetails() {
           ))}
         </ul>
       </div>
-      <p className="fine pad">Bonus is paid only once, after the coordinator confirms completion. It never depends on speed. You can refuse without penalty.</p>
+      <p className="fine pad">The bonus is approved once, after the Lifeline Admin confirms completion. Cancelled missions earn no bonus. You can decline without penalty. Payments are simulated.</p>
       {offered && (
         <div className="form-actions">
           <button className="btn-lime" disabled={!ok} onClick={() => accept(mission.id)}>Accept mission</button>

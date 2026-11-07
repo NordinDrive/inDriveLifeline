@@ -1,6 +1,6 @@
 import { createInitialState } from '../src/data/initialState';
 import { PHONE_DRIVER_ID } from '../src/data/mockDrivers';
-import { PASSENGER } from '../src/data/mockNGOs';
+import { PASSENGER } from '../src/data/mockPassenger';
 import * as wf from '../src/domain/workflow';
 import type { DomainState, Outcome } from '../src/domain/types';
 
@@ -11,42 +11,43 @@ export function must(o: Outcome): DomainState {
   return o.state;
 }
 
-export function verifiedOnlineDriver(state = createInitialState()): DomainState {
+/** Phone driver volunteers, is verified by the Admin and opts in to Lifeline missions. */
+export function availableVolunteer(state = createInitialState()): DomainState {
   let s = must(
     wf.applyForLifeline(state, PHONE_DRIVER_ID, { safetyTraining: true, conductAccepted: true, vehicleChecked: true, seats: 3, accessible: false }, NOW),
   );
   s = must(wf.approveDriver(s, PHONE_DRIVER_ID, NOW));
-  return must(wf.setDriverOnline(s, PHONE_DRIVER_ID, true, NOW));
+  return must(wf.setLifelineAvailability(s, PHONE_DRIVER_ID, true, NOW));
 }
 
 export function quakeA(state: DomainState): DomainState {
   return must(wf.activateScenario(state, { type: 'earthquake', districtId: 'A', severity: 'high', name: '' }, NOW));
 }
 
-export function evacuationInput(overrides: Partial<wf.RequestInput> = {}): wf.RequestInput {
+export function shelterInput(overrides: Partial<wf.RequestInput> = {}): wf.RequestInput {
   return {
     source: 'passenger',
     requesterId: PASSENGER.id,
-    service: 'evacuation_transfer',
     pickupId: 'P-ALPHA',
     destinationId: 'S-GREEN',
     passengers: 3,
     accessibility: 'none',
-    note: '',
-    acknowledged: true,
     ...overrides,
   };
 }
 
-/** Runs the primary journey up to an offered mission; returns state + ids. */
-export function offeredEvacuation() {
-  let s = quakeA(verifiedOnlineDriver());
-  const sub = wf.submitRequest(s, evacuationInput(), NOW);
+/** Admin activates, passenger requests, Admin approves: returns the published mission. */
+export function publishedMission(overrides: Partial<wf.RequestInput> = {}) {
+  let s = quakeA(availableVolunteer());
+  const sub = wf.submitRequest(s, shelterInput(overrides), NOW);
   s = must(sub);
-  const reqId = sub.id!;
-  s = must(wf.verifyNeed(s, reqId, NOW));
-  s = must(wf.approveRoute(s, reqId, NOW));
-  const off = wf.offerMission(s, reqId, NOW);
-  s = must(off);
-  return { state: s, reqId, missionId: off.id! };
+  const approved = wf.approveRequest(s, sub.id!, NOW);
+  s = must(approved);
+  return { state: s, reqId: sub.id!, missionId: approved.id! };
+}
+
+export function runToAwaiting(state: DomainState, missionId: string) {
+  let s = must(wf.acceptMission(state, missionId, PHONE_DRIVER_ID, NOW));
+  for (let i = 0; i < 5; i++) s = must(wf.advanceMission(s, missionId, PHONE_DRIVER_ID, NOW));
+  return s;
 }

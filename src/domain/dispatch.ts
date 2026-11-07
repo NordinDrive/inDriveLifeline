@@ -1,14 +1,17 @@
-import { pointById, routeById } from '../data/mockLocations';
+import { DISTRICTS, pointById, routeById } from '../data/mockLocations';
 import { driverIssues } from './eligibility';
 import { pointAuthorizedById, routeStatusById, routeStatusReason } from './hazard';
 import type { DomainState, Driver, Gate, Mission, MissionStatus, PassengerRequest } from './types';
 
-// Centralised dispatch gates (spec §8). UI components only render these results.
+// Centralised dispatch gates. UI components only render these results.
 
 export const ACTIVE_MISSION_STATUSES: MissionStatus[] = [
   'offered', 'accepted', 'en_route', 'at_pickup', 'onboard', 'arrived', 'awaiting_confirmation',
 ];
 export const IN_PROGRESS_STATUSES: MissionStatus[] = ['accepted', 'en_route', 'at_pickup', 'onboard', 'arrived'];
+
+/** Gate ids that only matter for new requests and offers, not for trips already under way. */
+const NEW_WORK_GATES = ['scenario', 'area'];
 
 export function missionFor(state: DomainState, req: PassengerRequest): Mission | undefined {
   return req.missionId ? state.missions.find((m) => m.id === req.missionId) : undefined;
@@ -18,78 +21,78 @@ export function driverIsBusy(state: DomainState, driverId: string): boolean {
   return state.missions.some((m) => m.driverId === driverId && IN_PROGRESS_STATUSES.includes(m.status));
 }
 
-export function eligibleDrivers(state: DomainState, req: Pick<PassengerRequest, 'service' | 'passengers' | 'accessibility'>): Driver[] {
+export function eligibleDrivers(state: DomainState, req: Pick<PassengerRequest, 'passengers' | 'accessibility'>): Driver[] {
   return Object.values(state.drivers).filter((d) => driverIssues(d, req, driverIsBusy(state, d.id)).length === 0);
 }
 
-/** Location/scenario gates shared by requests and missions. */
-function safetyGates(
-  state: DomainState,
-  item: { service: PassengerRequest['service']; pickupId: string; destinationId: string; routeId?: string },
-): Gate[] {
+/** True when Lifeline is open for people in this district. */
+export function lifelineOpenIn(state: DomainState, districtId: string): boolean {
+  return state.disaster.status === 'active' && state.disaster.districtId === districtId;
+}
+
+/** Scenario, area, location and route gates shared by requests and missions. */
+export function safetyGates(state: DomainState, item: { pickupId: string; destinationId: string; routeId?: string }): Gate[] {
   const d = state.disaster;
-  const isDisaster = item.service === 'evacuation_transfer';
   const rStatus = routeStatusById(item.routeId, d);
   const route = routeById(item.routeId);
+  const pickup = pointById(item.pickupId);
+  const destination = pointById(item.destinationId);
+  const inArea = Boolean(pickup && pickup.districtId === d.districtId);
   return [
     {
       id: 'scenario',
-      label: 'Active simulated scenario',
-      pass: !isDisaster || d.status === 'active',
-      detail: isDisaster
-        ? d.status === 'active' ? `${d.id} active` : 'Disaster transfers need an active simulated scenario'
-        : 'Routine service: no scenario required',
+      label: 'Admin-activated scenario',
+      pass: d.status === 'active',
+      detail: d.status === 'active' ? `${d.name} is active` : 'Lifeline needs an active, Admin-controlled disaster scenario',
+    },
+    {
+      id: 'area',
+      label: 'Pickup in the selected area',
+      pass: inArea,
+      detail: inArea ? `${pickup?.label} is in ${DISTRICTS[d.districtId].label}` : `Lifeline is only active in ${DISTRICTS[d.districtId].label}`,
     },
     {
       id: 'pickup',
-      label: 'Pickup point authorized',
-      pass: pointAuthorizedById(item.pickupId, d),
-      detail: pointAuthorizedById(item.pickupId, d)
-        ? `${pointById(item.pickupId)?.label} is a designated point`
-        : `${pointById(item.pickupId)?.label ?? 'Pickup'} is inside the simulated affected zone`,
+      label: 'Designated pickup point',
+      pass: pickup?.kind === 'pickup' && pointAuthorizedById(item.pickupId, d),
+      detail:
+        pickup?.kind !== 'pickup'
+          ? 'Not a designated pickup point'
+          : pointAuthorizedById(item.pickupId, d)
+            ? `${pickup.label} is a designated pickup point`
+            : `${pickup.label} is inside the simulated affected zone`,
     },
     {
       id: 'destination',
-      label: 'Destination authorized',
-      pass: pointAuthorizedById(item.destinationId, d),
-      detail: pointAuthorizedById(item.destinationId, d)
-        ? `${pointById(item.destinationId)?.label} is a designated point`
-        : `${pointById(item.destinationId)?.label ?? 'Destination'} is inside the simulated affected zone`,
+      label: 'Approved shelter',
+      pass: destination?.kind === 'shelter' && pointAuthorizedById(item.destinationId, d),
+      detail:
+        destination?.kind !== 'shelter'
+          ? 'Destination is not an approved shelter'
+          : pointAuthorizedById(item.destinationId, d)
+            ? `${destination.label} is an approved shelter`
+            : `${destination.label} is inside the simulated affected zone`,
     },
     {
       id: 'route',
-      label: 'Predefined route approved in mock data',
+      label: 'Route approved in the scenario',
       pass: Boolean(route) && rStatus === 'approved',
       detail: route ? `${route.id}: ${routeStatusReason(rStatus)}` : 'No predefined route between these points',
     },
   ];
 }
 
+/** Gates the Admin must pass to approve a request and publish it to volunteers. */
 export function requestGates(state: DomainState, req: PassengerRequest): Gate[] {
   const mission = missionFor(state, req);
-  const assigned = Boolean(mission && ACTIVE_MISSION_STATUSES.includes(mission.status));
-  const drivers = eligibleDrivers(state, req);
+  const dispatched = Boolean(mission && ACTIVE_MISSION_STATUSES.includes(mission.status));
   return [
-    ...safetyGates(state, req).slice(0, 1),
-    { id: 'verified', label: 'Need verified by operator', pass: req.verified, detail: req.verified ? 'Verified (demo)' : 'Awaiting verification' },
-    ...safetyGates(state, req).slice(1),
-    {
-      id: 'routeApproved',
-      label: 'Route approved by operator',
-      pass: req.routeApproved,
-      detail: req.routeApproved ? `${req.routeId} approved for this request` : 'Operator has not approved the route',
-    },
-    {
-      id: 'driver',
-      label: 'Eligible verified driver available',
-      pass: drivers.length > 0,
-      detail: drivers.length > 0 ? drivers.map((d) => d.name).join(', ') : 'No eligible Lifeline drivers available',
-    },
+    ...safetyGates(state, req),
     {
       id: 'unassigned',
-      label: 'Not already dispatched',
-      pass: !assigned,
-      detail: assigned ? `${mission?.id} is ${mission?.status.replace(/_/g, ' ')}` : 'No active mission',
+      label: 'Not already published',
+      pass: !dispatched,
+      detail: dispatched ? `${mission?.id} is ${mission?.status.replace(/_/g, ' ')}` : 'No active mission',
     },
   ];
 }
@@ -105,9 +108,9 @@ export function acceptGates(state: DomainState, mission: Mission, driver: Driver
     ...safetyGates(state, mission),
     {
       id: 'driver',
-      label: 'Driver eligible for this mission',
+      label: 'Eligible, available volunteer',
       pass: issues.length === 0,
-      detail: issues.length === 0 ? 'Lifeline Verified, online, capacity matches' : issues.join(' · '),
+      detail: issues.length === 0 ? 'Verified volunteer, available, seats and accessibility match' : issues.join(' · '),
     },
     {
       id: 'unassigned',
@@ -118,7 +121,11 @@ export function acceptGates(state: DomainState, mission: Mission, driver: Driver
   ];
 }
 
-/** Route/scenario reasons that should stop an offered or running mission. */
+/**
+ * Route and location reasons that should stop an offered mission or pause a trip
+ * under way. Includes the scenario/area gates only for offers that are not yet accepted.
+ */
 export function missionSafetyFailures(state: DomainState, mission: Mission): string[] {
-  return failedReasons(safetyGates(state, mission));
+  const gates = safetyGates(state, mission);
+  return failedReasons(mission.status === 'offered' ? gates : gates.filter((g) => !NEW_WORK_GATES.includes(g.id)));
 }

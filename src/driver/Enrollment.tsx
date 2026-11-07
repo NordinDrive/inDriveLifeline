@@ -39,7 +39,7 @@ export function Enrollment() {
 
   return (
     <div className="screen scroll ll form">
-      <ScreenHeader title="Complete Lifeline verification" subtitle={`Step ${step + 1} of ${steps.length}`} onBack={() => (step ? setStep(step - 1) : setUi('driver', { screen: 'lifeline' }))} />
+      <ScreenHeader title="Volunteer for Lifeline" subtitle={`Step ${step + 1} of ${steps.length}`} onBack={() => (step ? setStep(step - 1) : setUi('driver', { screen: 'lifeline' }))} />
       <ol className="enroll-steps">
         {steps.map((s, i) => (
           <li key={s.title} className={i < step ? 'done' : i === step ? 'current' : ''}>
@@ -101,7 +101,7 @@ export function Enrollment() {
           <div className="kv"><span>Training</span><strong>{modules.every(Boolean) ? 'Completed' : 'Incomplete'}</strong></div>
           <div className="kv"><span>Code of Conduct</span><strong>{conduct && privacy ? 'Accepted' : 'Pending'}</strong></div>
           <div className="kv"><span>Seats / accessibility</span><strong>{seats} · {accessible ? 'Accessible' : 'Standard'}</strong></div>
-          <p className="fine">A Lifeline coordinator performs a simulated eligibility review. You’ll be notified when you are Lifeline Verified.</p>
+          <p className="fine">The Lifeline Admin performs a simulated eligibility review. You’ll be notified when you are a verified volunteer.</p>
           <Reasons reasons={errors} title="Please fix" />
         </div>
       )}

@@ -31,17 +31,20 @@ export function PhoneToasts({ target }: { target: ToastTarget }) {
 /** Simulated disaster alert sheet. Clearly labeled and never flashing. */
 export function AlertSheet({
   role,
+  hidden,
   seenRevision,
   onDismiss,
   primary,
 }: {
   role: 'passenger' | 'driver';
+  /** E.g. the passenger is outside the selected area. */
+  hidden?: boolean;
   seenRevision: number;
   onDismiss: () => void;
   primary: { label: string; onClick: () => void };
 }) {
   const d = useDemo((s) => s.domain.disaster);
-  if (d.status !== 'active' || seenRevision >= d.revision) return null;
+  if (hidden || d.status !== 'active' || seenRevision >= d.revision) return null;
   const Icon = DISASTER_ICON[d.type];
   return (
     <div className="alert-sheet-wrap" role="alertdialog" aria-labelledby={`alert-title-${role}`}>
@@ -64,8 +67,8 @@ export function AlertSheet({
         </dl>
         <p className="alert-copy">
           {role === 'passenger'
-            ? 'This demo map shows fictional affected zones, designated pickup points and approved shelters. Lifeline offers safe transport between approved points only. It is not a rescue service.'
-            : 'Only verified Lifeline drivers can receive authorized transfers on approved fictional routes. Never enter the affected zone. You can refuse any task without penalty.'}
+            ? 'Lifeline is now open in your area. You can request transport from a designated pickup point to an approved shelter. Lifeline is not a rescue or ambulance service.'
+            : 'Verified volunteers who are available can accept approved shelter transport on approved routes. Never enter the affected zone. You can decline any mission without penalty.'}
         </p>
         <button className="btn-lime" onClick={primary.onClick}>{primary.label}</button>
         <button className="btn-ghost" onClick={onDismiss}>Dismiss</button>

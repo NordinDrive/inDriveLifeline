@@ -6,7 +6,8 @@ import { hazardPolygon, pointAuthorized, routeStatus, routeStatusReason } from '
 import type { Mission, Point, RouteStatus, SafePoint } from '../domain/types';
 
 // Self-contained fictional SVG map (no tiles, no API key). Styled after the dark
-// navy map in the reference screenshot. All zones and routes are simulated.
+// navy map in the reference screenshot; colours come from theme variables
+// (see tokens.css) so it has a matching light version. All zones and routes are simulated.
 
 const ROADS: Point[][] = [
   [{ x: -10, y: 60 }, { x: 140, y: 110 }, { x: 260, y: 70 }, { x: 410, y: 30 }],
@@ -41,10 +42,11 @@ const HAZARD_COLORS = {
 
 const SEVERITY_OPACITY = { advisory: 0.18, high: 0.28, critical: 0.4 } as const;
 
-const ROUTE_STYLE: Record<RouteStatus, { stroke: string; dash?: string }> = {
-  approved: { stroke: '#9be15d' },
-  blocked: { stroke: '#ff5a5f', dash: '6 5' },
-  unknown: { stroke: '#a0a7b4', dash: '2 5' },
+/** Dash patterns keep route meaning readable without colour; colours are themed in CSS. */
+const ROUTE_DASH: Record<RouteStatus, string | undefined> = {
+  approved: undefined,
+  blocked: '6 5',
+  unknown: '2 5',
 };
 
 function vehiclePosition(m: Mission): Point | null {
@@ -118,9 +120,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
     if (!showNetwork) return false;
     if (r.id === trackRoute) return true;
     if (!layers.routes) return false;
-    if (variant === 'operator') return true;
-    // Phones only show the evacuation network to keep the small map legible.
-    return active && ['P-ALPHA', 'P-BETA'].includes(r.pickupPointId);
+    return variant === 'operator' || active;
   });
 
   const popover = (() => {
@@ -163,18 +163,18 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
             <line x1="0" y1="0" x2="0" y2="8" stroke={hazardColor} strokeWidth="2.5" opacity="0.5" />
           </pattern>
         </defs>
-        <rect width={MAP_WIDTH} height={MAP_HEIGHT} fill="#1b2a44" />
+        <rect width={MAP_WIDTH} height={MAP_HEIGHT} className="fm-bg" />
         {/* city blocks */}
-        <g fill="#20314f">
+        <g className="fm-blocks">
           {Array.from({ length: 30 }, (_, i) => (
             <rect key={i} x={(i * 53) % 380} y={(i * 97) % 420} width={30 + (i % 4) * 8} height={22 + (i % 3) * 10} rx="3" transform={`rotate(${(i % 5) * 6 - 12} ${(i * 53) % 380} ${(i * 97) % 420})`} />
           ))}
         </g>
-        <path d="M0 230 Q120 250 140 330 T120 440 L0 440Z" fill="#1d3a3a" opacity="0.55" />
-        <g stroke="#2d4569" strokeWidth="2" fill="none">
+        <path d="M0 230 Q120 250 140 330 T120 440 L0 440Z" className="fm-park" />
+        <g className="fm-minor" strokeWidth="2" fill="none">
           {MINOR.map((r, i) => <path key={i} d={toPath(r)} />)}
         </g>
-        <g stroke="#3c5888" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <g className="fm-roads" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round">
           {ROADS.map((r, i) => <path key={i} d={toPath(r)} />)}
         </g>
 
@@ -183,7 +183,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
             <path d={`${toPath(poly)} Z`} fill={hazardColor} opacity={SEVERITY_OPACITY[disaster.severity]} />
             <path d={`${toPath(poly)} Z`} fill={`url(#hatch-${variant})`} />
             <path d={`${toPath(poly)} Z`} fill="none" stroke={hazardColor} strokeWidth="2" strokeDasharray={disaster.severity === 'critical' ? undefined : '5 4'} />
-            <text x={DISTRICTS[disaster.districtId].center.x} y={DISTRICTS[disaster.districtId].center.y} textAnchor="middle" className="fmap-zone-label" fill="#fff">
+            <text x={DISTRICTS[disaster.districtId].center.x} y={DISTRICTS[disaster.districtId].center.y} textAnchor="middle" className="fmap-zone-label">
               Affected zone (simulated)
             </text>
           </g>
@@ -199,17 +199,16 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
 
         {visibleRoutes.map((r) => {
           const st = statuses[r.id];
-          const style = ROUTE_STYLE[st];
           const emphasized = r.id === trackRoute || relatedRoutes.includes(r.id) || selection?.id === r.id;
           const dim = (selectedPickup && !relatedRoutes.includes(r.id)) || (trackRoute && r.id !== trackRoute && variant !== 'operator');
           return (
             <g key={r.id} opacity={dim ? 0.35 : 1}>
-              <path d={toPath(r.path)} stroke="#0e1626" strokeWidth={emphasized ? 9 : 7} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              <path d={toPath(r.path)} className="fm-casing" strokeWidth={emphasized ? 9 : 7} fill="none" strokeLinecap="round" strokeLinejoin="round" />
               <path
                 d={toPath(r.path)}
-                stroke={style.stroke}
+                className={`fm-route fm-route--${st}`}
                 strokeWidth={emphasized ? 5 : 3.5}
-                strokeDasharray={style.dash}
+                strokeDasharray={ROUTE_DASH[st]}
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -228,7 +227,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
                 <title>{`${r.id}: ${st}`}</title>
               </path>
               {(variant === 'operator' || emphasized) && (
-                <text x={r.path[1].x + 4} y={r.path[1].y - 5} className="fmap-route-label" fill={style.stroke}>
+                <text x={r.path[1].x + 4} y={r.path[1].y - 5} className={`fmap-route-label fm-label--${st}`}>
                   {r.id.replace('ROUTE-', '')}
                 </text>
               )}
@@ -238,7 +237,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
 
         {SAFE_POINTS.filter(visiblePoint).map((p) => {
           const ok = pointAuthorized(p, disaster);
-          const fill = !ok ? '#ff5a5f' : p.kind === 'shelter' ? '#C1F11D' : p.kind === 'pickup' ? '#5ee0a0' : '#f5c84b';
+          const tone = !ok ? 'fm-pt--blocked' : `fm-pt--${p.kind}`;
           return (
             <g
               key={p.id}
@@ -251,17 +250,13 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
             >
               {p.kind === 'shelter' ? (
                 <>
-                  <rect x="-11" y="-11" width="22" height="22" rx="6" fill={fill} stroke="#0e1626" strokeWidth="2" />
+                  <rect x="-11" y="-11" width="22" height="22" rx="6" className={`fm-pt ${tone}`} strokeWidth="2" />
                   <path d="M-6 2l6-6 6 6v5h-12z" fill="#111" />
-                </>
-              ) : p.kind === 'pickup' ? (
-                <>
-                  <circle r="10" fill={fill} stroke="#0e1626" strokeWidth="2" />
-                  <circle r="3.5" fill="#0e1626" />
                 </>
               ) : (
                 <>
-                  <rect x="-9" y="-9" width="18" height="18" rx="3" fill={fill} stroke="#0e1626" strokeWidth="2" transform="rotate(45)" />
+                  <circle r="10" className={`fm-pt ${tone}`} strokeWidth="2" />
+                  <circle r="3.5" fill="#111" />
                 </>
               )}
               {(variant !== 'home' || active) && (
@@ -282,8 +277,8 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
               { x: 110, y: 330, r: -10 },
             ].map((c, i) => (
               <g key={i} transform={`translate(${c.x} ${c.y}) rotate(${c.r})`}>
-                <rect x="-6" y="-11" width="12" height="22" rx="4" fill="#e9eef5" />
-                <rect x="-4.5" y="-6" width="9" height="6" rx="1.5" fill="#6c7a8f" />
+                <rect x="-6" y="-11" width="12" height="22" rx="4" className="fm-car" />
+                <rect x="-4.5" y="-6" width="9" height="6" rx="1.5" className="fm-car-glass" />
               </g>
             ))}
           </g>
@@ -292,14 +287,14 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
         {vehicle && (
           <g transform={`translate(${vehicle.x} ${vehicle.y})`} className="fmap-vehicle">
             <circle r="13" fill="#C1F11D" opacity="0.25" />
-            <rect x="-6" y="-10" width="12" height="20" rx="4" fill="#fff" stroke="#0e1626" strokeWidth="1.5" />
+            <rect x="-6" y="-10" width="12" height="20" rx="4" className="fm-vehicle-body" strokeWidth="1.5" />
             <rect x="-4" y="-5" width="8" height="5" rx="1.5" fill="#444" />
           </g>
         )}
 
         {popover && (
           <g transform={`translate(${Math.min(Math.max(popover.at.x, 92), MAP_WIDTH - 92)} ${Math.max(popover.at.y - 20, 40)})`} className="fmap-popover">
-            <rect x="-88" y="-36" width="176" height="34" rx="8" fill="#111" stroke={popover.tone === 'approved' ? '#9be15d' : popover.tone === 'unknown' ? '#a0a7b4' : '#ff5a5f'} />
+            <rect x="-88" y="-36" width="176" height="34" rx="8" className={`fm-pop fm-pop--${popover.tone}`} />
             <text x="-80" y="-22" className="fmap-pop-title">{popover.title}</text>
             <text x="-80" y="-9" className="fmap-pop-line">{popover.line}</text>
           </g>
@@ -309,7 +304,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
       <div className="fmap-badge">Fictional Demo Map</div>
       {showLegend && showNetwork && (
         <div className="fmap-legend">
-          <span><i className="lg lg-pickup" />Safe pickup</span>
+          <span><i className="lg lg-pickup" />Pickup point</span>
           <span><i className="lg lg-shelter" />Shelter</span>
           <span><i className="lg lg-approved" />Approved</span>
           <span><i className="lg lg-blocked" />Blocked</span>

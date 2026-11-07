@@ -1,5 +1,6 @@
 import type { District, SafePoint, SafeRoute } from '../domain/types';
 
+// Designated pickup points (assembly points) and approved shelters only.
 // Fictional map coordinates in a 400 × 440 SVG space. Not real geography.
 export const MAP_WIDTH = 400;
 export const MAP_HEIGHT = 440;
@@ -15,8 +16,6 @@ export const SAFE_POINTS: SafePoint[] = [
   { id: 'P-BETA', label: 'Community Center Beta', kind: 'pickup', districtId: 'A', approved: true, mapX: 215, mapY: 250 },
   { id: 'S-GREEN', label: 'Shelter Green', kind: 'shelter', districtId: 'A', approved: true, mapX: 60, mapY: 85, capacity: 120, occupancy: 46 },
   { id: 'S-NORTH', label: 'Safe Hub North', kind: 'shelter', districtId: 'B', approved: true, mapX: 335, mapY: 50, capacity: 80, occupancy: 21 },
-  { id: 'L-FOOD', label: 'Food Distribution Hub', kind: 'logistics', districtId: 'C', approved: true, mapX: 340, mapY: 392 },
-  { id: 'L-DELTA', label: 'Donation Point Delta', kind: 'logistics', districtId: 'C', approved: true, mapX: 185, mapY: 410 },
 ];
 
 export const SAFE_ROUTES: SafeRoute[] = [
@@ -28,14 +27,6 @@ export const SAFE_ROUTES: SafeRoute[] = [
     path: [{ x: 55, y: 345 }, { x: 140, y: 372 }, { x: 250, y: 368 }, { x: 376, y: 300 }, { x: 376, y: 95 }, { x: 335, y: 50 }] },
   { id: 'ROUTE-D4', label: 'North boulevard', pickupPointId: 'P-BETA', destinationPointId: 'S-NORTH',
     path: [{ x: 215, y: 250 }, { x: 255, y: 185 }, { x: 300, y: 120 }, { x: 335, y: 50 }] },
-  { id: 'ROUTE-L1', label: 'Market street', pickupPointId: 'L-FOOD', destinationPointId: 'P-BETA',
-    path: [{ x: 340, y: 392 }, { x: 290, y: 320 }, { x: 215, y: 250 }] },
-  { id: 'ROUTE-L2', label: 'East bypass', pickupPointId: 'L-FOOD', destinationPointId: 'S-NORTH',
-    path: [{ x: 340, y: 392 }, { x: 388, y: 330 }, { x: 388, y: 100 }, { x: 335, y: 50 }] },
-  { id: 'ROUTE-L3', label: 'Harbour lane', pickupPointId: 'L-DELTA', destinationPointId: 'L-FOOD',
-    path: [{ x: 185, y: 410 }, { x: 270, y: 404 }, { x: 340, y: 392 }] },
-  { id: 'ROUTE-L4', label: 'Coastal road', pickupPointId: 'L-FOOD', destinationPointId: 'S-GREEN',
-    path: [{ x: 340, y: 392 }, { x: 185, y: 425 }, { x: 55, y: 400 }, { x: 14, y: 330 }, { x: 14, y: 110 }, { x: 60, y: 85 }] },
 ];
 
 export function pointById(id: string): SafePoint | undefined {
@@ -55,3 +46,5 @@ export function destinationsFrom(pickupId: string): SafePoint[] {
     .map((r) => pointById(r.destinationPointId))
     .filter((p): p is SafePoint => Boolean(p));
 }
+
+export const PICKUP_POINTS = SAFE_POINTS.filter((p) => p.kind === 'pickup');
