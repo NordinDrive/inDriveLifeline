@@ -9,7 +9,7 @@ export function DriversTab() {
   const perform = useDemo((s) => s.perform);
   return (
     <div className="op-stack">
-      <p className="op-muted">Drivers join Lifeline voluntarily and need extra verification on top of their inDrive account. Only verified volunteers who choose to be available can accept missions. Reviews here are simulated.</p>
+      <p className="op-muted">Drivers join Lifeline voluntarily and need extra verification on top of their inDrive account. Only verified volunteers who choose to be available can accept missions.</p>
       {Object.values(domain.drivers).map((d) => (
         <article key={d.id} className="op-req">
           <header>
@@ -32,7 +32,7 @@ export function DriversTab() {
             {d.eligibility === 'suspended' && <button className="op-btn" onClick={() => perform((s, now) => reinstateDriver(s, d.id, now))}>Reinstate</button>}
             {!d.isPhoneDriver && d.eligibility === 'verified' && (
               <button className="op-btn" onClick={() => perform((s, now) => setLifelineAvailability(s, d.id, !d.available, now))}>
-                Simulate: {d.available ? 'not available' : 'available'}
+                Set {d.available ? 'not available' : 'available'}
               </button>
             )}
           </div>

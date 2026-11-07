@@ -127,7 +127,7 @@ export const useDemo = create<Store>((set, get) => ({
     const ui = createInitialUi();
     ui.stage = { ...get().ui.stage, guideStep: 0 };
     set({ domain: createInitialState(), ui, toasts: [] });
-    get().toast('stage', 'Demo reset: Lifeline inactive, no requests or missions', 'success');
+    get().toast('stage', 'Reset: Lifeline inactive, no requests or missions', 'success');
   },
 }));
 

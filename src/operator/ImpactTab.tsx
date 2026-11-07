@@ -1,5 +1,4 @@
 import { useDemo } from '../app/store';
-import { DemoTag } from '../components/ui';
 import { shortTime } from '../domain/labels';
 import { computeImpact } from '../domain/metrics';
 
@@ -27,7 +26,7 @@ export function ImpactTab() {
         ))}
       </div>
       <div className="op-card">
-        <h3 className="op-h3">Fictional bonus budget</h3>
+        <h3 className="op-h3">Bonus budget</h3>
         <div className="op-progress"><span style={{ width: `${Math.min(100, (spent / m.bonusBudget) * 100)}%` }} /></div>
         <p className="op-progress-label">{spent} MAD of {m.bonusBudget} MAD approved</p>
       </div>
@@ -36,9 +35,8 @@ export function ImpactTab() {
         <ul className="op-list">
           <li>Trips and people count only after the Admin confirms completion, once per mission.</li>
           <li>A submitted request is never counted as a completed ride.</li>
-          <li>Cancelled missions never earn a bonus. Payments are simulated.</li>
+          <li>Cancelled missions never earn a bonus.</li>
         </ul>
-        <DemoTag>Illustrative / Demo Data: not inDrive operational data</DemoTag>
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export function DriverApp() {
         avatarHue={170}
         onSelect={onSelect}
         onClose={() => setUi('driver', { menuOpen: false })}
-        onMode={() => toast('driver', 'Mode switching is off in this demo: the Passenger app is on the other phone.', 'info')}
+        onMode={() => toast('driver', 'The Passenger app is on the other phone.', 'info')}
       />
       <AlertSheet
         role="driver"

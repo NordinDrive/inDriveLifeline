@@ -34,7 +34,3 @@ export function Reasons({ reasons, title = 'Unavailable because' }: { reasons: s
     </div>
   );
 }
-
-export function DemoTag({ children = 'Demo data' }: { children?: ReactNode }) {
-  return <span className="demo-tag">{children}</span>;
-}

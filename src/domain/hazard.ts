@@ -64,9 +64,9 @@ export function routeStatusById(routeId: string | undefined, d: DisasterScenario
 }
 
 export function routeStatusReason(status: RouteStatus): string {
-  if (status === 'blocked') return 'Passes through the simulated affected zone';
+  if (status === 'blocked') return 'Passes through the affected zone';
   if (status === 'unknown') return 'Runs along the edge of the affected zone; status unverified';
-  return 'Approved fictional route';
+  return 'Approved route';
 }
 
 export function pointAuthorized(point: SafePoint | undefined, d: DisasterScenario): boolean {

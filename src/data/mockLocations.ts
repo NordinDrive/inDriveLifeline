@@ -6,9 +6,9 @@ export const MAP_WIDTH = 400;
 export const MAP_HEIGHT = 440;
 
 export const DISTRICTS: Record<District['id'], District> = {
-  A: { id: 'A', label: 'Demo District A', center: { x: 130, y: 210 } },
-  B: { id: 'B', label: 'Demo District B', center: { x: 300, y: 125 } },
-  C: { id: 'C', label: 'Demo District C', center: { x: 290, y: 335 } },
+  A: { id: 'A', label: 'District A', center: { x: 130, y: 210 } },
+  B: { id: 'B', label: 'District B', center: { x: 300, y: 125 } },
+  C: { id: 'C', label: 'District C', center: { x: 290, y: 335 } },
 };
 
 export const SAFE_POINTS: SafePoint[] = [

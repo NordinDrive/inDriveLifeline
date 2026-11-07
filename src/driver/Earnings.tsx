@@ -1,6 +1,6 @@
 import { useDemo } from '../app/store';
 import { PHONE_DRIVER_ID } from '../data/mockDrivers';
-import { Badge, DemoTag, ScreenHeader } from '../components/ui';
+import { Badge, ScreenHeader } from '../components/ui';
 import { BONUS_LABEL, shortTime } from '../domain/labels';
 import { bonusTotals } from '../domain/rewards';
 import { SERVICE_LABEL } from '../domain/workflow';
@@ -13,7 +13,7 @@ export function Earnings() {
 
   return (
     <div className="screen scroll ll">
-      <ScreenHeader title="Earnings history" subtitle="Lifeline · simulated amounts" onBack={() => setUi('driver', { screen: 'lifeline' })} />
+      <ScreenHeader title="Earnings history" subtitle="Lifeline bonuses and trip fares" onBack={() => setUi('driver', { screen: 'lifeline' })} />
       <div className="earn-hero">
         <small>Lifeline bonuses approved</small>
         <strong>{t.approvedBonus} MAD</strong>
@@ -40,8 +40,7 @@ export function Earnings() {
       ) : (
         <p className="d-empty">No Lifeline missions yet.</p>
       )}
-      <p className="fine pad">Bonuses stay pending until the Admin confirms completion, are approved once per mission, and are never paid for cancelled missions. Simulated: no real payment, banking data or transfer.</p>
-      <div className="ll-foot"><DemoTag>Illustrative / Demo Data</DemoTag></div>
+      <p className="fine pad">Bonuses stay pending until the Admin confirms completion, are approved once per mission, and are never paid for cancelled missions.</p>
     </div>
   );
 }

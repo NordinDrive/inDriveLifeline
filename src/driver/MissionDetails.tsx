@@ -4,7 +4,7 @@ import { PHONE_DRIVER_ID } from '../data/mockDrivers';
 import { pointById } from '../data/mockLocations';
 import { FictionalMap } from '../components/FictionalMap';
 import { EarningsLines, missionSource } from '../components/MissionCard';
-import { DemoTag, ScreenHeader } from '../components/ui';
+import { ScreenHeader } from '../components/ui';
 import { ACCESSIBILITY_LABEL } from '../domain/labels';
 import { acceptGates } from '../domain/dispatch';
 import { routeById } from '../data/mockLocations';
@@ -50,14 +50,13 @@ export function MissionDetails() {
           ))}
         </ul>
       </div>
-      <p className="fine pad">The bonus is approved once, after the Lifeline Admin confirms completion. Cancelled missions earn no bonus. You can decline without penalty. Payments are simulated.</p>
+      <p className="fine pad">The bonus is approved once, after the Lifeline Admin confirms completion. Cancelled missions earn no bonus. You can decline without penalty.</p>
       {offered && (
         <div className="form-actions">
           <button className="btn-lime" disabled={!ok} onClick={() => accept(mission.id)}>Accept mission</button>
           <button className="btn-dark" onClick={() => { decline(mission.id); setUi('driver', { screen: 'lifeline' }); }}>Decline</button>
         </div>
       )}
-      <div className="ll-foot"><DemoTag>Fictional route and amounts</DemoTag></div>
     </div>
   );
 }

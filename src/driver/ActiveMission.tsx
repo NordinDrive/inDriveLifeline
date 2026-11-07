@@ -3,7 +3,7 @@ import { useDemo } from '../app/store';
 import { PHONE_DRIVER_ID } from '../data/mockDrivers';
 import { pointById } from '../data/mockLocations';
 import { FictionalMap } from '../components/FictionalMap';
-import { Badge, DemoTag, ScreenHeader } from '../components/ui';
+import { Badge, ScreenHeader } from '../components/ui';
 import { EarningsLines } from '../components/MissionCard';
 import { BONUS_LABEL } from '../domain/labels';
 import { advanceMission, MISSION_ACTION, MISSION_FLOW, reportSafetyIssue, SERVICE_LABEL } from '../domain/workflow';
@@ -78,7 +78,6 @@ export function ActiveMission() {
           </button>
         )}
       </div>
-      <div className="ll-foot"><DemoTag>Simulated trip · no real navigation</DemoTag></div>
     </div>
   );
 }

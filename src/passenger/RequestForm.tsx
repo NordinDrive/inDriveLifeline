@@ -45,7 +45,7 @@ export function RequestForm() {
 
   return (
     <div className="screen scroll ll form">
-      <ScreenHeader title="Transport to a shelter" subtitle="Lifeline · simulated request" onBack={() => setUi('passenger', { screen: 'lifeline' })} />
+      <ScreenHeader title="Transport to a shelter" subtitle="Lifeline" onBack={() => setUi('passenger', { screen: 'lifeline' })} />
       {showErrors && errors.scenario && <Reasons reasons={[errors.scenario]} title="Lifeline is not available" />}
 
       <section className="field">

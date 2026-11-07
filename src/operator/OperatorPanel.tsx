@@ -31,10 +31,10 @@ export function OperatorPanel() {
       <header className="op-head">
         <div>
           <h2><Activity size={18} /> Lifeline Admin</h2>
-          <p>Controls activation, approvals and confirmations · simulation only</p>
+          <p>Controls activation, approvals and confirmations</p>
         </div>
         <span className={`op-mode ${active ? 'is-active' : ''}`}>
-          {active ? `${SCENARIO_TEMPLATES[disaster.type].label} · ${DISTRICTS[disaster.districtId].label.replace('Demo ', '')} · ${SEVERITY_LABEL[disaster.severity]}` : disaster.status === 'resolved' ? 'Scenario resolved' : 'Lifeline inactive'}
+          {active ? `${SCENARIO_TEMPLATES[disaster.type].label} · ${DISTRICTS[disaster.districtId].label} · ${SEVERITY_LABEL[disaster.severity]}` : disaster.status === 'resolved' ? 'Scenario resolved' : 'Lifeline inactive'}
         </span>
       </header>
       <nav className="op-tabs" role="tablist">

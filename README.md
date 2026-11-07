@@ -35,7 +35,7 @@ The 10 guided steps follow the core story:
 
 1. Lifeline starts inactive.
 2. A driver volunteers and is verified, then turns on availability.
-3. **Admin activates** *Earthquake · Demo District A · High*.
+3. **Admin activates** *Earthquake · District A · High*.
 4. **Passenger requests shelter transport** for 3 people (Assembly Point Alpha → Shelter Green).
 5. **Admin approves** `ROUTE-A1`, which publishes the mission.
 6. **Volunteer accepts**, having seen the +15 MAD bonus and the 25 MAD fare as separate lines.
@@ -49,9 +49,9 @@ The 10 guided steps follow the core story:
 | Journey | How |
 |---|---|
 | **Inactive** | After Reset, the passenger's Lifeline screen shows "not active in your area" with no request button. The driver's list shows "on standby". |
-| **Outside the area** | Activate in Demo District B or C. The passenger, who lives in District A, gets no alert and no request option. |
+| **Outside the area** | Activate in District B or C. The passenger, who lives in District A, gets no alert and no request option. |
 | **Blocked route** | Activate any scenario, then request Community Center Beta → Shelter Green. The form warns that `ROUTE-B2` is blocked, and in Requests the Admin's approve button is disabled with the failing check listed. A flood also makes `ROUTE-A1` *unknown*, which cannot be approved either. |
-| **Eligibility** | Before the volunteer joins, or while they are unavailable, mission cards show **Accept** disabled with the reason. Requests for 4 passengers exceed the demo car's 3 seats; wheelchair requests need Yasmin's accessible van (Volunteers → *Simulate: available*). |
+| **Eligibility** | Before the volunteer joins, or while they are unavailable, mission cards show **Accept** disabled with the reason. Requests for 4 passengers exceed the car's 3 seats; wheelchair requests need Yasmin's accessible van (Volunteers → *Set available*). |
 | **Safety pause** | During a trip the driver taps *Report safety concern & pause*, or the Admin changes the scenario so the route becomes blocked. The trip pauses until the Admin resumes or cancels it. A cancelled mission earns no bonus. |
 | **Resolve** | Open offers and unassigned requests close. Trips under way can finish, and completed history and earnings stay until Reset. |
 
@@ -70,10 +70,12 @@ The four reference screenshots (passenger home, driver home offline, driver menu
 - **Menus:** the item order is unchanged. **Lifeline** is inserted directly under *City to City*: before *Notifications* in the driver menu, and before *Freight* in the passenger menu, where *Freight* follows *City to City*.
 - **Fonts and icons:** Inter is a substitute for inDrive's proprietary typeface, and Lucide icons stand in for the original icon set.
 - **Illustrations:** the service-tile artwork, city photos and social icons are simplified original SVG drawings, not copied brand assets. The Google map is replaced by a self-contained fictional SVG map.
+- **Driver home:** the peach *Fix these issues…* banner from the reference screenshot has been removed on request.
+- **Labels:** in-app *simulated / fictional / demo* labels and the footer disclaimer have been removed; this README's top note still states that everything is fictional.
 - **Inferred screens** (not in the references): all Lifeline screens, the driver "online" request list, alert sheets, the trip tracker and the Admin panel. They reuse the measured tokens: dark surfaces, `#C1F11D` lime CTAs, the coral offline pill and the peach banner.
 - **Light mode** is inferred, not measured: white surfaces, light-gray cards, dark text and clear borders, with the same lime accent and dark button labels. Lime used as text or icon colour switches to a darker olive so it stays readable on white. The map has a light palette, and approved, blocked and unknown routes keep their meaning through both colour and dash pattern. All colours are shared variables in `src/styles/tokens.css`.
 - **Volunteer start state:** the phone driver starts as `not_enrolled`, so joining Lifeline voluntarily can be shown. Guided step 2 runs sign-up, Admin verification and availability together.
-- **Area:** the demo passenger lives in Demo District A, where both designated pickup points are. Activating another district shows that Lifeline is limited to the selected area.
+- **Area:** the demo passenger lives in District A, where both designated pickup points are. Activating another district shows that Lifeline is limited to the selected area.
 
 ## Project layout
 

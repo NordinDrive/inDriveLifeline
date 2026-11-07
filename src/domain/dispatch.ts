@@ -60,7 +60,7 @@ export function safetyGates(state: DomainState, item: { pickupId: string; destin
           ? 'Not a designated pickup point'
           : pointAuthorizedById(item.pickupId, d)
             ? `${pickup.label} is a designated pickup point`
-            : `${pickup.label} is inside the simulated affected zone`,
+            : `${pickup.label} is inside the affected zone`,
     },
     {
       id: 'destination',
@@ -71,7 +71,7 @@ export function safetyGates(state: DomainState, item: { pickupId: string; destin
           ? 'Destination is not an approved shelter'
           : pointAuthorizedById(item.destinationId, d)
             ? `${destination.label} is an approved shelter`
-            : `${destination.label} is inside the simulated affected zone`,
+            : `${destination.label} is inside the affected zone`,
     },
     {
       id: 'route',

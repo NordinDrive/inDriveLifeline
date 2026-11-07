@@ -135,7 +135,7 @@ export function submitRequest(state: DomainState, input: RequestInput, now: stri
     id,
     source: input.source,
     requesterId: input.requesterId,
-    requesterLabel: input.requesterLabel ?? (input.source === 'passenger' ? PASSENGER.name : 'Resident (Demo)'),
+    requesterLabel: input.requesterLabel ?? (input.source === 'passenger' ? PASSENGER.name : 'Resident'),
     pickupId: input.pickupId,
     destinationId: input.destinationId,
     routeId: route?.id,
@@ -329,7 +329,7 @@ export function confirmCompletion(state: DomainState, missionId: string, now: st
   if (bonusCheck.ok) next = patchBonus(next, missionId, { status: 'approved' }, now);
   const req = getRequest(state, mission.requestId);
   next = log(next, 'operator', `Confirmed completion of ${missionId}`, 'success', now);
-  if (bonusCheck.ok) next = log(next, 'system', `Bonus approved: ${mission.bonus} MAD for ${state.drivers[mission.driverId!]?.name} (simulated, no payout)`, 'success', now);
+  if (bonusCheck.ok) next = log(next, 'system', `Bonus approved: ${mission.bonus} MAD for ${state.drivers[mission.driverId!]?.name}`, 'success', now);
   return done(next, [
     ...passengerNotice(req, 'Safe arrival confirmed by Lifeline. Thank you.', 'success'),
     ...driverNotice(
@@ -428,7 +428,7 @@ export function approveDriver(state: DomainState, driverId: string, now: string)
   if (d.eligibility === 'verified') return fail(state, 'Driver already verified');
   if (d.eligibility !== 'pending_review') return fail(state, d.eligibility === 'not_enrolled' ? 'Driver has not volunteered yet' : `Driver is ${d.eligibility}`);
   let next = patchDriver(state, driverId, { eligibility: 'verified' });
-  next = log(next, 'operator', `Verified ${d.name} as a Lifeline volunteer (simulated review)`, 'success', now);
+  next = log(next, 'operator', `Verified ${d.name} as a Lifeline volunteer`, 'success', now);
   return done(next, driverNotice(driverId, 'You are now a verified Lifeline volunteer', 'success'));
 }
 
@@ -478,7 +478,7 @@ export interface ScenarioConfig {
 }
 
 export function scenarioName(cfg: Omit<ScenarioConfig, 'name'>): string {
-  return `Demo District ${cfg.districtId} ${SCENARIO_TEMPLATES[cfg.type].label}`;
+  return `District ${cfg.districtId} ${SCENARIO_TEMPLATES[cfg.type].label}`;
 }
 
 /** Re-applies safety gates after the scenario changes: withdraws offers, pauses unsafe trips. */
@@ -523,14 +523,14 @@ export function activateScenario(state: DomainState, cfg: ScenarioConfig, now: s
   next = log(
     next,
     'operator',
-    `${wasActive ? 'Updated' : 'Activated'} simulated ${SCENARIO_TEMPLATES[cfg.type].label.toLowerCase()}: ${disaster.name}, ${SEVERITY_LABEL[cfg.severity]}`,
+    `${wasActive ? 'Updated' : 'Activated'} ${SCENARIO_TEMPLATES[cfg.type].label.toLowerCase()}: ${disaster.name}, ${SEVERITY_LABEL[cfg.severity]}`,
     'danger',
     now,
   );
   const rec = reconcile(next, now);
   const statuses = SAFE_ROUTES.map((r) => `${r.id} ${routeStatusById(r.id, disaster)}`).join(', ');
   next = log(rec.state, 'system', `Route statuses: ${statuses}`, 'info', now);
-  const msg = `SIMULATED ALERT: ${disaster.name} (${SEVERITY_LABEL[cfg.severity]})`;
+  const msg = `ALERT: ${disaster.name} (${SEVERITY_LABEL[cfg.severity]})`;
   return done(next, [
     ...(cfg.districtId === PASSENGER.districtId ? [{ target: 'passenger' as const, message: msg, tone: 'danger' as const }] : []),
     { target: 'driver', message: msg, tone: 'danger' },
@@ -563,8 +563,8 @@ export function resolveScenario(state: DomainState, now: string): Outcome {
   next = log(next, 'operator', `Resolved ${state.disaster.name}. New requests closed; history and earnings kept`, 'success', now);
   const rec = reconcile(next, now);
   return done(rec.state, [
-    { target: 'passenger', message: 'Simulated scenario resolved. Lifeline requests are closed.', tone: 'success' },
-    { target: 'driver', message: 'Simulated scenario resolved. No new Lifeline missions.', tone: 'success' },
+    { target: 'passenger', message: 'Scenario resolved. Lifeline requests are closed.', tone: 'success' },
+    { target: 'driver', message: 'Scenario resolved. No new Lifeline missions.', tone: 'success' },
     ...rec.notices,
   ]);
 }
@@ -583,7 +583,7 @@ export function simulateResidentRequest(state: DomainState, now: string): Outcom
     state,
     {
       source: 'resident',
-      requesterLabel: `Resident family (Demo #${n})`,
+      requesterLabel: `Resident family #${n}`,
       pickupId: route.pickupPointId,
       destinationId: route.destinationPointId,
       passengers: 2,

@@ -51,11 +51,10 @@ export function AlertSheet({
       <div className="alert-sheet-scrim" onClick={onDismiss} />
       <div className={`alert-sheet sev-${d.severity}`}>
         <button className="alert-close" onClick={onDismiss} aria-label="Dismiss alert"><X size={20} /></button>
-        <div className="alert-sim-label">SIMULATED ALERT — NOT A REAL EMERGENCY</div>
         <div className="alert-head">
           <span className="alert-icon"><Icon size={26} /></span>
           <div>
-            <h3 id={`alert-title-${role}`}>Simulated disaster alert</h3>
+            <h3 id={`alert-title-${role}`}>Disaster alert</h3>
             <p>{d.name}</p>
           </div>
         </div>
@@ -86,7 +85,7 @@ export function AlertStrip({ onClick }: { onClick?: () => void }) {
     <button className={`alert-strip sev-${d.severity}`} onClick={onClick}>
       <Icon size={18} />
       <span>
-        <strong>SIMULATED</strong> · {SCENARIO_TEMPLATES[d.type].label} · {DISTRICTS[d.districtId].label} · {SEVERITY_LABEL[d.severity]}
+        <strong>{SCENARIO_TEMPLATES[d.type].label}</strong> · {DISTRICTS[d.districtId].label} · {SEVERITY_LABEL[d.severity]}
       </span>
     </button>
   );
@@ -101,7 +100,7 @@ export function InfoSheet({ title, onClose }: { title?: string; onClose: () => v
       <div className="info-sheet">
         <div className="info-grabber" />
         <h3>{title}</h3>
-        <p>This existing inDrive section is shown for context only. It is not part of the Lifeline prototype.</p>
+        <p>This inDrive section is not part of Lifeline.</p>
         <button className="btn-lime" onClick={onClose}>OK</button>
       </div>
     </div>

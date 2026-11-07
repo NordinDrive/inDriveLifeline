@@ -51,13 +51,12 @@ export function Enrollment() {
 
       {step === 0 && (
         <div className="ll-card">
-          <p className="muted">Your existing inDrive driver record (demo data). Lifeline adds extra checks on top.</p>
+          <p className="muted">Your existing inDrive driver record. Lifeline adds extra checks on top.</p>
           <div className="kv"><span>Driver</span><strong>{driver.name}</strong></div>
           <div className="kv"><span>inDrive account</span><strong>{driver.accountStatus}</strong></div>
-          <div className="kv"><span>Driving licence</span><strong>On file (demo)</strong></div>
-          <div className="kv"><span>Vehicle documents</span><strong>On file (demo)</strong></div>
-          <div className="kv"><span>Safety record</span><strong>No open incidents (demo)</strong></div>
-          <p className="fine">No real identity documents are processed in this prototype.</p>
+          <div className="kv"><span>Driving licence</span><strong>On file</strong></div>
+          <div className="kv"><span>Vehicle documents</span><strong>On file</strong></div>
+          <div className="kv"><span>Safety record</span><strong>No open incidents</strong></div>
         </div>
       )}
 
@@ -91,7 +90,7 @@ export function Enrollment() {
             </div>
           </div>
           <label className="ack"><input type="checkbox" checked={accessible} onChange={(e) => setAccessible(e.target.checked)} /><span>Wheelchair accessible vehicle</span></label>
-          <label className="ack"><input type="checkbox" checked={vehicleOk} onChange={(e) => setVehicleOk(e.target.checked)} /><span>I confirm the vehicle details are accurate (simulated vehicle check).</span></label>
+          <label className="ack"><input type="checkbox" checked={vehicleOk} onChange={(e) => setVehicleOk(e.target.checked)} /><span>I confirm the vehicle details are accurate.</span></label>
           <p className="fine">Passenger seats exclude the driver’s seat. Requests needing more seats or accessibility than you declare will not be offered to you.</p>
         </div>
       )}
@@ -101,7 +100,7 @@ export function Enrollment() {
           <div className="kv"><span>Training</span><strong>{modules.every(Boolean) ? 'Completed' : 'Incomplete'}</strong></div>
           <div className="kv"><span>Code of Conduct</span><strong>{conduct && privacy ? 'Accepted' : 'Pending'}</strong></div>
           <div className="kv"><span>Seats / accessibility</span><strong>{seats} · {accessible ? 'Accessible' : 'Standard'}</strong></div>
-          <p className="fine">The Lifeline Admin performs a simulated eligibility review. You’ll be notified when you are a verified volunteer.</p>
+          <p className="fine">The Lifeline Admin reviews your eligibility. You’ll be notified when you are a verified volunteer.</p>
           <Reasons reasons={errors} title="Please fix" />
         </div>
       )}

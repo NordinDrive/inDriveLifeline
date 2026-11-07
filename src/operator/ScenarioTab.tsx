@@ -81,7 +81,7 @@ export function ScenarioTab() {
           </div>
         </div>
         {districtId !== PASSENGER.districtId && (
-          <p className="op-note">The demo passenger lives in {DISTRICTS[PASSENGER.districtId].label}, and all designated pickup points are there. Choose it to show Lifeline on the Passenger phone.</p>
+          <p className="op-note">The passenger lives in {DISTRICTS[PASSENGER.districtId].label}, and all designated pickup points are there. Choose it to show Lifeline on the Passenger phone.</p>
         )}
         <label className="op-label" htmlFor="op-name">Scenario name</label>
         <input id="op-name" value={name} placeholder={placeholder} onChange={(e) => setName(e.target.value)} maxLength={60} />
@@ -118,13 +118,13 @@ export function ScenarioTab() {
           <button
             className="op-btn"
             disabled={!active}
-            title={active ? 'Adds a request from another fictional resident' : 'Activate Lifeline first'}
+            title={active ? 'Adds a request from another resident' : 'Activate Lifeline first'}
             onClick={() => {
               const out = perform((s, now) => simulateResidentRequest(s, now));
               if (out.ok) setUi('operator', { tab: 'queue', selectedRequestId: out.id });
             }}
           >
-            Simulate resident request
+            Add resident request
           </button>
         </div>
       </div>

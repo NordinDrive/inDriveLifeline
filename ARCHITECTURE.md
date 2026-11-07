@@ -41,7 +41,7 @@ The passenger tracker maps these to customer-facing steps: Submitted → Admin r
 
 ## Safety boundaries
 
-- Every alert is labeled **SIMULATED — NOT A REAL EMERGENCY**, and no real emergency numbers are shown.
+- In-app labels no longer say "simulated", "fictional" or "demo", and there is no stage footer disclaimer: the whole page is understood to be a simulation. No real emergency numbers are shown.
 - Lifeline is never presented as rescue or ambulance transport. It moves people only between designated pickup points and approved shelters.
 - Route safety comes from Admin-controlled mock data and fictional geometry. The prototype does **not** assess real-world safety.
 - Drivers can refuse or pause any task without penalty, and bonuses never depend on speed.

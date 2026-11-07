@@ -50,7 +50,7 @@ export const GUIDE_STEPS: Step[] = [
   },
   {
     title: 'Admin activates a disaster',
-    detail: 'Earthquake · Demo District A · High. Both phones get a SIMULATED alert; ROUTE-A1 is approved, ROUTE-B2 is blocked.',
+    detail: 'Earthquake · District A · High. Both phones get an alert; ROUTE-A1 is approved, ROUTE-B2 is blocked.',
     run: () => {
       S().setUi('operator', { tab: 'scenario' });
       if (S().domain.disaster.status !== 'active')

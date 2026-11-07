@@ -76,11 +76,10 @@ export function App() {
           <span className="brand-mark"><HeartHandshake size={18} /></span>
           <strong>inDrive Lifeline</strong>
           <span className="brand-sub">Interactive Demo</span>
-          <span className="proto-tag">Prototype / Demo</span>
         </div>
         <div className={`stage-scenario ${disaster.status === 'active' ? 'is-active' : ''}`}>
           <Route size={15} />
-          {disaster.status === 'active' ? `SIMULATED: ${disaster.name}` : disaster.status === 'resolved' ? 'Scenario resolved' : 'Lifeline inactive'}
+          {disaster.status === 'active' ? disaster.name : disaster.status === 'resolved' ? 'Scenario resolved' : 'Lifeline inactive'}
         </div>
         <div className="stage-actions">
           <div className="theme-toggle" role="radiogroup" aria-label="Theme">
@@ -131,10 +130,6 @@ export function App() {
       <div className="stage-toasts" aria-live="polite">
         {stageToasts.map((t) => <div key={t.id} className={`stage-toast tone-${t.tone}`}>{t.message}</div>)}
       </div>
-
-      <footer className="stage-foot">
-        DEMO ONLY: fictional people, places, routes and amounts. Not an official inDrive service, not a rescue or ambulance service. No real disaster alert, emergency dispatch or payment.
-      </footer>
     </div>
   );
 }

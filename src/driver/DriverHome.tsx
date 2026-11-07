@@ -1,4 +1,4 @@
-import { ChevronRight, HeartHandshake, Info, LayoutGrid, List, Menu, Settings } from 'lucide-react';
+import { ChevronRight, HeartHandshake, LayoutGrid, List, Menu, Settings } from 'lucide-react';
 import { useDemo } from '../app/store';
 import { PHONE_DRIVER_ID } from '../data/mockDrivers';
 import { FictionalMap } from '../components/FictionalMap';
@@ -34,11 +34,6 @@ export function DriverHome() {
           <Settings size={24} strokeWidth={2} />
         </button>
       </div>
-      <button className="d-banner" onClick={() => setUi('driver', { info: 'Fix these issues' })}>
-        <span className="d-banner-i"><Info size={16} strokeWidth={3} /></span>
-        <span>Fix these issues to avoid missing best requests</span>
-        <ChevronRight size={22} />
-      </button>
 
       <div className="d-body scroll">
         {homeTab === 'requests' ? (
@@ -86,7 +81,6 @@ export function DriverHome() {
               <div><span>Lifeline trip fares</span><strong>{totals.approvedBase} MAD</strong></div>
             </div>
             <button className="btn-dark" onClick={() => setUi('driver', { screen: 'earnings' })}>Open earnings history</button>
-            <p className="d-fine">Demo amounts only. No real payouts.</p>
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@ import { useDemo } from '../app/store';
 import { pointById } from '../data/mockLocations';
 import { PASSENGER } from '../data/mockPassenger';
 import { FictionalMap } from '../components/FictionalMap';
-import { Badge, DemoTag, ScreenHeader } from '../components/ui';
+import { Badge, ScreenHeader } from '../components/ui';
 import { lifelineOpenIn } from '../domain/dispatch';
 import { ACCESSIBILITY_LABEL, REQUEST_LABEL, shortTime, TRACKER_STEPS, trackerIndex } from '../domain/labels';
 import { routeStatusById, routeStatusReason } from '../domain/hazard';
@@ -86,7 +86,7 @@ export function RequestTracker() {
             <small>{driver.vehicle} · {driver.plate}</small>
             <Badge tone="lime">Verified volunteer</Badge>
           </div>
-          <button className="round-btn round-btn--sm" aria-label="Contact driver (simulated)" onClick={() => useDemo.getState().toast('passenger', 'Calls are simulated in this demo')}>
+          <button className="round-btn round-btn--sm" aria-label="Contact driver" onClick={() => useDemo.getState().toast('passenger', 'Calling is not available yet')}>
             <Phone size={18} />
           </button>
         </div>
@@ -112,7 +112,6 @@ export function RequestTracker() {
           ))}
         </div>
       )}
-      <div className="ll-foot"><DemoTag>Simulated tracking · fictional data</DemoTag></div>
     </div>
   );
 }

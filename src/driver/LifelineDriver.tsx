@@ -5,7 +5,7 @@ import { PHONE_DRIVER_ID } from '../data/mockDrivers';
 import { PICKUP_POINTS } from '../data/mockLocations';
 import { MissionCard } from '../components/MissionCard';
 import { AlertStrip } from '../components/PhoneOverlays';
-import { Badge, DemoTag, ScreenHeader } from '../components/ui';
+import { Badge, ScreenHeader } from '../components/ui';
 import { BONUS_LABEL, ELIGIBILITY_LABEL, ELIGIBILITY_TONE, MISSION_LABEL } from '../domain/labels';
 import { bonusTotals } from '../domain/rewards';
 import { SERVICE_LABEL, setLifelineAvailability } from '../domain/workflow';
@@ -41,7 +41,7 @@ export function LifelineDriver() {
             <button className="btn-lime" onClick={() => setUi('driver', { screen: 'enroll' })}>Join Lifeline as a volunteer</button>
           </>
         )}
-        {driver.eligibility === 'pending_review' && <p>Your application is with the Lifeline Admin for a simulated review. You’ll be notified when you are verified.</p>}
+        {driver.eligibility === 'pending_review' && <p>Your application is with the Lifeline Admin for review. You’ll be notified when you are verified.</p>}
         {verified && <p>{driver.vehicle} · {driver.seats} passenger seats · {driver.accessible ? 'wheelchair accessible' : 'not wheelchair accessible'}. You can decline any mission without penalty.</p>}
         {driver.eligibility === 'suspended' && <p>Your Lifeline access is suspended. You can’t accept missions. Contact support to appeal.</p>}
         {verified && (
@@ -113,7 +113,6 @@ export function LifelineDriver() {
       ) : (
         <p className="d-empty">No missions yet.</p>
       )}
-      <div className="ll-foot"><DemoTag>Fictional missions · simulated payments</DemoTag></div>
     </div>
   );
 }

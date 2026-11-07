@@ -21,7 +21,7 @@ export function createInitialState(): DomainState {
     requests: [],
     missions: [],
     bonuses: {},
-    events: [{ id: 'EVT-0001', at: T0, actor: 'system', message: 'Demo initialised: Lifeline inactive until the Admin activates a scenario', tone: 'info' }],
+    events: [{ id: 'EVT-0001', at: T0, actor: 'system', message: 'Lifeline inactive until the Admin activates a scenario', tone: 'info' }],
     counters: { request: 0, mission: 0, event: 1 },
   };
 }

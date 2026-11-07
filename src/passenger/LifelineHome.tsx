@@ -4,7 +4,7 @@ import { DISTRICTS } from '../data/mockLocations';
 import { PASSENGER } from '../data/mockPassenger';
 import { FictionalMap } from '../components/FictionalMap';
 import { AlertStrip } from '../components/PhoneOverlays';
-import { Badge, DemoTag, ScreenHeader } from '../components/ui';
+import { Badge, ScreenHeader } from '../components/ui';
 import { lifelineOpenIn } from '../domain/dispatch';
 
 export function LifelineHome() {
@@ -20,7 +20,7 @@ export function LifelineHome() {
 
   const inactiveText =
     disaster.status === 'resolved'
-      ? 'The simulated disaster scenario has been resolved, so new transport requests are closed. Your earlier requests stay below.'
+      ? 'The disaster scenario has been resolved, so new transport requests are closed. Your earlier requests stay below.'
       : disaster.status === 'active'
         ? `Lifeline is currently active in ${DISTRICTS[disaster.districtId].label} only. Your area is ${DISTRICTS[PASSENGER.districtId].label}.`
         : 'Lifeline opens only when the Lifeline Admin activates a disaster scenario for your area. You will get an alert here when it does.';
@@ -78,7 +78,6 @@ export function LifelineHome() {
           enter hazardous areas; they only travel between designated pickup points and approved shelters.
         </p>
       </div>
-      <div className="ll-foot"><DemoTag>Prototype · simulated scenario · fictional places</DemoTag></div>
     </div>
   );
 }
@@ -86,7 +85,7 @@ export function LifelineHome() {
 export function HowItWorks() {
   const setUi = useDemo((s) => s.setUi);
   const steps = [
-    ['Admin activates', 'The Lifeline Admin switches Lifeline on for a disaster-affected area (simulated here).'],
+    ['Admin activates', 'The Lifeline Admin switches Lifeline on for a disaster-affected area.'],
     ['You request', 'Choose a designated pickup point, an approved shelter, how many people and any accessibility needs.'],
     ['Admin approves the route', 'Only predefined routes that avoid the affected zone can be approved.'],
     ['A volunteer accepts', 'Verified volunteer drivers with enough seats and the right vehicle can accept.'],
@@ -112,7 +111,6 @@ export function HowItWorks() {
           <li>Run outside an Admin-activated disaster scenario</li>
         </ul>
       </div>
-      <div className="ll-foot"><DemoTag>Concept prototype · not an official inDrive service</DemoTag></div>
     </div>
   );
 }

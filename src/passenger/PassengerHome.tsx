@@ -3,7 +3,6 @@ import { useDemo } from '../app/store';
 import { CityRidesArt, CityToCityArt, CourierArt, FreightArt, RouteCardArt } from '../components/BrandIcons';
 import { FictionalMap } from '../components/FictionalMap';
 import { AlertStrip } from '../components/PhoneOverlays';
-import { DemoTag } from '../components/ui';
 import { PASSENGER } from '../data/mockPassenger';
 import { lifelineOpenIn } from '../domain/dispatch';
 
@@ -27,7 +26,7 @@ export function PassengerHome() {
           <button className="pickup-pill" onClick={() => info('Pickup point')}>
             <span>
               <small>Pickup point</small>
-              <strong>Demo Boulevard 113</strong>
+              <strong>Boulevard Anfa 113</strong>
             </span>
             <ChevronRight size={20} />
           </button>
@@ -37,7 +36,7 @@ export function PassengerHome() {
             <span><svg width="22" height="22" viewBox="0 0 24 24" fill="#111"><circle cx="12" cy="5" r="3" /><path d="M7 21l2-8-3-3 4-2h4l3 4 3 1-1 2-4-1-1 2 2 5h-2l-2-4-2 4z" /></svg></span>
           </div>
         )}
-        <button className="round-btn round-btn--map locate" aria-label="My location" onClick={() => toast('passenger', 'Location is simulated in this demo')}>
+        <button className="round-btn round-btn--map locate" aria-label="My location" onClick={() => toast('passenger', 'Location updated')}>
           <Navigation size={24} strokeWidth={2} style={{ transform: 'rotate(-45deg)' }} />
         </button>
       </div>
@@ -100,7 +99,6 @@ export function PassengerHome() {
             <span>From 500 MAD</span>
           </button>
         </div>
-        <div className="p-home-foot"><DemoTag>Prototype · fictional data</DemoTag></div>
       </div>
     </div>
   );

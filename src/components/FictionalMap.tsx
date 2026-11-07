@@ -132,13 +132,13 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
       return {
         at: mid,
         title: `${r.id} · ${r.label}`,
-        line: st === 'approved' ? 'Approved fictional route' : `Dispatch unavailable: ${routeStatusReason(st).toLowerCase()}`,
+        line: st === 'approved' ? 'Approved route' : `Dispatch unavailable: ${routeStatusReason(st).toLowerCase()}`,
         tone: st,
       };
     }
     const p = pointById(selection.id)!;
     const ok = pointAuthorized(p, disaster);
-    const cap = p.capacity ? ` · ${p.occupancy}/${p.capacity} places (demo)` : '';
+    const cap = p.capacity ? ` · ${p.occupancy}/${p.capacity} places` : '';
     return {
       at: { x: p.mapX, y: p.mapY },
       title: p.label,
@@ -155,7 +155,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
         viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
         preserveAspectRatio={variant === 'home' ? 'xMidYMid slice' : 'xMidYMid meet'}
         role="img"
-        aria-label="Fictional demo map"
+        aria-label="Map"
         onClick={() => setSelection(null)}
       >
         <defs>
@@ -184,7 +184,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
             <path d={`${toPath(poly)} Z`} fill={`url(#hatch-${variant})`} />
             <path d={`${toPath(poly)} Z`} fill="none" stroke={hazardColor} strokeWidth="2" strokeDasharray={disaster.severity === 'critical' ? undefined : '5 4'} />
             <text x={DISTRICTS[disaster.districtId].center.x} y={DISTRICTS[disaster.districtId].center.y} textAnchor="middle" className="fmap-zone-label">
-              Affected zone (simulated)
+              Affected zone
             </text>
           </g>
         )}
@@ -301,7 +301,6 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
         )}
       </svg>
 
-      <div className="fmap-badge">Fictional Demo Map</div>
       {showLegend && showNetwork && (
         <div className="fmap-legend">
           <span><i className="lg lg-pickup" />Pickup point</span>
@@ -309,7 +308,7 @@ export function FictionalMap({ variant, network, highlightRouteId, focusPointIds
           <span><i className="lg lg-approved" />Approved</span>
           <span><i className="lg lg-blocked" />Blocked</span>
           <span><i className="lg lg-unknown" />Unknown</span>
-          {active && <span><i className="lg lg-zone" style={{ background: hazardColor }} />Affected (sim.)</span>}
+          {active && <span><i className="lg lg-zone" style={{ background: hazardColor }} />Affected zone</span>}
         </div>
       )}
     </div>

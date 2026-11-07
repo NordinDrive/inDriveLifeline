@@ -104,7 +104,7 @@ function RequestCard({ req }: { req: PassengerRequest }) {
           <button className="op-btn op-btn--lime" onClick={() => perform((s, now) => confirmCompletion(s, mission.id, now))}>Confirm completion</button>
         )}
         {bonus && ['pending_completion', 'pending_confirmation'].includes(bonus.status) && (
-          <button className="op-btn" onClick={() => perform((s, now) => holdBonus(s, mission!.id, 'Random quality review (demo)', now))}>Hold bonus for review</button>
+          <button className="op-btn" onClick={() => perform((s, now) => holdBonus(s, mission!.id, 'Random quality review', now))}>Hold bonus for review</button>
         )}
         {bonus?.status === 'held' && <button className="op-btn" onClick={() => perform((s, now) => releaseBonus(s, mission!.id, now))}>Release bonus</button>}
         {mission?.safetyHold && <button className="op-btn" onClick={() => perform((s, now) => clearSafetyHold(s, mission.id, now))}>Resume after review</button>}
