@@ -1,0 +1,51 @@
+/* Design tokens measured from the reference screenshots (920×2000 px captures,
+   scaled to a 390 pt wide phone screen). */
+:root {
+  --lime: #c1f11d;
+  --lime-press: #aed61a;
+  --lime-ink: #111;
+
+  --app-bg: #141414;          /* gaps between passenger home sheets */
+  --sheet: #212121;           /* passenger home panels */
+  --tile: #2b2b2b;            /* service tiles / search field */
+  --driver-bg: #1c1c1c;       /* driver home background */
+  --menu-bg: #242424;         /* side menu panel */
+  --menu-active: #2e2e2e;     /* active row (City) */
+  --menu-divider: #3a3a3a;
+  --card: #262626;
+  --card-2: #2f2f2f;
+  --line: #353535;
+
+  --text: #ffffff;
+  --text-2: #a7a7a7;
+  --text-3: #7c7c7c;
+  --icon: #9a9a9a;
+
+  --coral: #f46b6b;           /* driver "Offline" pill */
+  --peach: #fdd9b5;           /* driver warning banner */
+  --peach-ink: #2a2118;
+  --star: #ff9f0a;
+
+  --map-bg: #1b2a44;
+
+  --ok: #6fd36b;
+  --warn: #ffb547;
+  --danger: #ff5a5f;
+  --info: #7cb7ff;
+
+  --radius-sheet: 26px;
+  --radius-tile: 22px;
+  --radius-btn: 14px;
+
+  --phone-scale: 1;
+
+  /* stage (presentation shell), not part of the reproduced app */
+  --stage-bg: #0b0c0e;
+  --stage-panel: #15171b;
+  --stage-panel-2: #1c1f24;
+  --stage-line: #2a2e35;
+  --stage-text: #e9ebef;
+  --stage-text-2: #9aa1ad;
+
+  color-scheme: dark;
+}

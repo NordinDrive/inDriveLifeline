@@ -1,0 +1,51 @@
+import type { Driver } from '../domain/types';
+
+export const PHONE_DRIVER_ID = 'DRV-001';
+
+export const MOCK_DRIVERS: Driver[] = [
+  {
+    id: PHONE_DRIVER_ID,
+    name: 'Alex (Demo)',
+    accountStatus: 'Verified (Demo)',
+    eligibility: 'not_enrolled',
+    vehicle: '4-seat car · Demo Sedan',
+    plate: 'DEMO 123',
+    seats: 3,
+    accessible: false,
+    districtId: 'A',
+    online: false,
+    rating: '5,0 (12)',
+    training: { safety: false, conduct: false, vehicleCheck: false },
+    isPhoneDriver: true,
+  },
+  {
+    id: 'DRV-002',
+    name: 'Yasmin (Demo)',
+    accountStatus: 'Verified (Demo)',
+    eligibility: 'verified',
+    vehicle: 'Accessible van · Demo Van',
+    plate: 'DEMO 456',
+    seats: 6,
+    accessible: true,
+    districtId: 'B',
+    online: false,
+    rating: '4,9 (204)',
+    training: { safety: true, conduct: true, vehicleCheck: true },
+    isPhoneDriver: false,
+  },
+  {
+    id: 'DRV-003',
+    name: 'Karim (Demo)',
+    accountStatus: 'Verified (Demo)',
+    eligibility: 'suspended',
+    vehicle: '4-seat car · Demo Hatchback',
+    plate: 'DEMO 789',
+    seats: 3,
+    accessible: false,
+    districtId: 'C',
+    online: true,
+    rating: '4,6 (88)',
+    training: { safety: true, conduct: true, vehicleCheck: true },
+    isPhoneDriver: false,
+  },
+];
